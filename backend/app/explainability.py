@@ -1,4 +1,4 @@
-from model_loader import load_model
+from app.model_loader import load_model
 import shap
 import pandas as pd
 
