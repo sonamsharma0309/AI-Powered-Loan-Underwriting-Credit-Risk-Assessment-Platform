@@ -178,11 +178,13 @@ def predict():
 
     df = pd.DataFrame([row])
 
-    prediction = int(model.predict(df)[0])
     prob = float(model.predict_proba(df)[0][1])
 
-    risk_score = round(prob * 100,2)
-    approval_probability = round((1-prob)*100,2)
+        # YOUR TRAINING THRESHOLD = 0.4
+    prediction = 1 if prob >= 0.4 else 0
+
+    risk_score = round(prob * 100, 2)
+    approval_probability = round((1 - prob) * 100, 2)
 
     decision = "Approved" if prediction == 0 else "Rejected"
 
