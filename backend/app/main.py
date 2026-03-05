@@ -25,7 +25,6 @@ def init_db():
 
     conn = get_db()
 
-    # APPLICATION TABLE
     conn.execute("""
     CREATE TABLE IF NOT EXISTS applications(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,7 +37,6 @@ def init_db():
     )
     """)
 
-    # USERS TABLE
     conn.execute("""
     CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -257,7 +255,7 @@ def analytics():
 
 
 # -----------------------------
-# AI EXPLANATION
+# AI EXPLANATION (UPDATED)
 # -----------------------------
 
 @app.route("/explain", methods=["POST"])
@@ -269,19 +267,69 @@ def explain():
     loan = float(data["loanAmount"])
     credit = float(data["creditHistory"])
 
+    employment = float(data.get("employmentYears",0))
+    interest = float(data.get("interestRate",0))
+    loan_percent = float(data.get("loanPercentIncome",0))
+
+    home = data.get("homeOwnership","")
+    intent = data.get("loanIntent","")
+    grade = data.get("loanGrade","")
+    default = data.get("previousDefault","0")
+
     reasons = []
 
-    if loan/income > 0.5:
-        reasons.append("Loan amount too high compared to income")
+    loan_ratio = loan / income
 
-    if credit < 10:
-        reasons.append("Short credit history")
+    # CREDIT HISTORY
+    if credit < 5:
+        reasons.append("Very short credit history increases default risk")
+    elif credit >= 10:
+        reasons.append("Strong credit history improves loan eligibility")
 
-    if loan > income*0.4:
-        reasons.append("High loan to income ratio")
+    # EMPLOYMENT
+    if employment < 2:
+        reasons.append("Short employment history indicates unstable income")
+    elif employment >= 5:
+        reasons.append("Stable employment history supports repayment ability")
+
+    # INTEREST RATE
+    if interest > 15:
+        reasons.append("High interest rate indicates higher financial risk")
+    elif interest < 8:
+        reasons.append("Low interest rate indicates safer credit profile")
+
+    # HOME OWNERSHIP
+    if home == "rent":
+        reasons.append("Renting home increases financial risk")
+    elif home == "own":
+        reasons.append("Home ownership improves financial stability")
+
+    # LOAN PURPOSE
+    if intent == "education":
+        reasons.append("Education loans are evaluated more flexibly")
+    elif intent == "business":
+        reasons.append("Business loans involve moderate financial uncertainty")
+    elif intent == "personal":
+        reasons.append("Personal loans require stronger repayment ability")
+
+    # LOAN GRADE
+    if grade in ["A","B"]:
+        reasons.append("High loan grade indicates strong credit quality")
+    elif grade in ["E","F","G"]:
+        reasons.append("Low loan grade increases default probability")
+
+    # PREVIOUS DEFAULT
+    if default == "1":
+        reasons.append("Previous loan default negatively affects approval chances")
+
+    # BALANCED LOAN CHECK
+    if loan_ratio > 0.8 and intent != "education":
+        reasons.append("Loan size is very high relative to income")
+    elif loan_ratio < 0.4:
+        reasons.append("Loan amount appears manageable relative to income")
 
     if len(reasons)==0:
-        reasons.append("Applicant profile looks safe")
+        reasons.append("Applicant financial profile appears balanced")
 
     return jsonify({"reasons":reasons})
 
