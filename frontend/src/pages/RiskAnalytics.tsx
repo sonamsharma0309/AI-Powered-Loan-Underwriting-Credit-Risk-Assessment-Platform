@@ -10,6 +10,7 @@ YAxis,
 Tooltip,
 Cell
 } from "recharts"
+const API="https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com/";
 
 export default function RiskAnalytics(){
 
@@ -18,11 +19,11 @@ const [apps,setApps] = useState<any[]>([])
 
 useEffect(()=>{
 
-fetch("http://localhost:5000/analytics")
+fetch(`${API}/analytics`)
 .then(res=>res.json())
 .then(data=>setStats(data))
 
-fetch("http://localhost:5000/applications")
+fetch(`${API}/applications`)
 .then(res=>res.json())
 .then(data=>setApps(data))
 

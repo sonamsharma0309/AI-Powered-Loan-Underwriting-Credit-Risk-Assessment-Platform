@@ -3,6 +3,7 @@ from flask_cors import CORS
 import joblib
 import pandas as pd
 import sqlite3
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 app = Flask(__name__)
@@ -18,6 +19,18 @@ def get_db():
 
 
 # -----------------------------
+# SECURITY HEADERS
+# -----------------------------
+
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
+
+
+# -----------------------------
 # DATABASE INIT
 # -----------------------------
 
@@ -25,7 +38,6 @@ def init_db():
 
     conn = get_db()
 
-    # APPLICATION TABLE
     conn.execute("""
     CREATE TABLE IF NOT EXISTS applications(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,7 +50,6 @@ def init_db():
     )
     """)
 
-    # USERS TABLE
     conn.execute("""
     CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,8 +79,13 @@ def register():
 
     data = request.json
 
-    email = data["email"]
-    password = data["password"]
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"success": False, "message": "Email and password required"}), 400
+
+    hashed_password = generate_password_hash(password)
 
     conn = get_db()
 
@@ -80,17 +96,17 @@ def register():
 
     if user:
         conn.close()
-        return jsonify({"success":False,"message":"User already exists"})
+        return jsonify({"success": False, "message": "User already exists"})
 
     conn.execute(
         "INSERT INTO users(email,password) VALUES (?,?)",
-        (email,password)
+        (email, hashed_password)
     )
 
     conn.commit()
     conn.close()
 
-    return jsonify({"success":True})
+    return jsonify({"success": True})
 
 
 # -----------------------------
@@ -102,27 +118,27 @@ def login():
 
     data = request.json
 
-    email = data["email"]
-    password = data["password"]
+    email = data.get("email")
+    password = data.get("password")
 
     conn = get_db()
 
     user = conn.execute(
-        "SELECT * FROM users WHERE email=? AND password=?",
-        (email,password)
+        "SELECT * FROM users WHERE email=?",
+        (email,)
     ).fetchone()
 
     conn.close()
 
-    if user:
+    if user and check_password_hash(user["password"], password):
         return jsonify({
-            "success":True,
-            "token":"creditai-user"
+            "success": True,
+            "token": "creditai-user"
         })
 
     return jsonify({
-        "success":False,
-        "message":"Invalid credentials"
+        "success": False,
+        "message": "Invalid credentials"
     })
 
 
@@ -135,11 +151,25 @@ def predict():
 
     data = request.json
 
-    name = data["name"]
-    age = float(data["age"])
-    income = float(data["income"])
-    loan = float(data["loanAmount"])
-    credit = float(data["creditHistory"])
+    name = data.get("name")
+    age = data.get("age")
+    income = data.get("income")
+    loan = data.get("loanAmount")
+    credit = data.get("creditHistory")
+
+    if not name or age is None or income is None or loan is None or credit is None:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    age = float(age)
+    income = float(income)
+    loan = float(loan)
+    credit = float(credit)
+
+    if age < 18:
+        return jsonify({"error": "Applicant must be at least 18"}), 400
+
+    if income <= 0 or loan <= 0:
+        return jsonify({"error": "Income and loan must be positive"}), 400
 
     loan_percent_income = loan / income
     loan_to_income_ratio = loan / income
@@ -156,33 +186,36 @@ def predict():
         "loan_to_income_ratio": loan_to_income_ratio,
         "interest_income_ratio": interest_income_ratio,
 
-        "person_home_ownership_OTHER":0,
-        "person_home_ownership_OWN":0,
-        "person_home_ownership_RENT":1,
+        "person_home_ownership_OTHER": 0,
+        "person_home_ownership_OWN": 0,
+        "person_home_ownership_RENT": 1,
 
-        "loan_intent_EDUCATION":0,
-        "loan_intent_HOMEIMPROVEMENT":0,
-        "loan_intent_MEDICAL":0,
-        "loan_intent_PERSONAL":1,
-        "loan_intent_VENTURE":0,
+        "loan_intent_EDUCATION": 0,
+        "loan_intent_HOMEIMPROVEMENT": 0,
+        "loan_intent_MEDICAL": 0,
+        "loan_intent_PERSONAL": 1,
+        "loan_intent_VENTURE": 0,
 
-        "loan_grade_B":0,
-        "loan_grade_C":0,
-        "loan_grade_D":0,
-        "loan_grade_E":0,
-        "loan_grade_F":0,
-        "loan_grade_G":0,
+        "loan_grade_B": 0,
+        "loan_grade_C": 0,
+        "loan_grade_D": 0,
+        "loan_grade_E": 0,
+        "loan_grade_F": 0,
+        "loan_grade_G": 0,
 
-        "cb_person_default_on_file_Y":0
+        "cb_person_default_on_file_Y": 0
     }
 
     df = pd.DataFrame([row])
 
     prob = float(model.predict_proba(df)[0][1])
 
+<<<<<<< HEAD
         # YOUR TRAINING THRESHOLD = 0.4
     prediction = 1 if prob >= 0.4 else 0
 
+=======
+>>>>>>> 43066da3255c2caa3dfcbd8327af5ea103ff1000
     risk_score = round(prob * 100, 2)
     approval_probability = round((1 - prob) * 100, 2)
 
@@ -192,16 +225,16 @@ def predict():
 
     conn.execute(
         "INSERT INTO applications(name,age,income,loan,decision,risk) VALUES (?,?,?,?,?,?)",
-        (name,age,income,loan,decision,risk_score)
+        (name, age, income, loan, decision, risk_score)
     )
 
     conn.commit()
     conn.close()
 
     return jsonify({
-        "risk_score":risk_score,
-        "approval_probability":approval_probability,
-        "decision":decision
+        "risk_score": risk_score,
+        "approval_probability": approval_probability,
+        "decision": decision
     })
 
 
@@ -251,10 +284,10 @@ def analytics():
     conn.close()
 
     return jsonify({
-        "total":total,
-        "approved":approved,
-        "rejected":rejected,
-        "avg_risk":avg_risk or 0
+        "total": total,
+        "approved": approved,
+        "rejected": rejected,
+        "avg_risk": avg_risk or 0
     })
 
 
@@ -271,21 +304,62 @@ def explain():
     loan = float(data["loanAmount"])
     credit = float(data["creditHistory"])
 
+    employment = float(data.get("employmentYears",0))
+    interest = float(data.get("interestRate",0))
+
+    home = data.get("homeOwnership","")
+    intent = data.get("loanIntent","")
+    grade = data.get("loanGrade","")
+    default = data.get("previousDefault","0")
+
     reasons = []
 
-    if loan/income > 0.5:
-        reasons.append("Loan amount too high compared to income")
+    loan_ratio = loan / income
 
-    if credit < 10:
-        reasons.append("Short credit history")
+    if credit < 5:
+        reasons.append("Very short credit history increases default risk")
+    elif credit >= 10:
+        reasons.append("Strong credit history improves loan eligibility")
 
-    if loan > income*0.4:
-        reasons.append("High loan to income ratio")
+    if employment < 2:
+        reasons.append("Short employment history indicates unstable income")
+    elif employment >= 5:
+        reasons.append("Stable employment history supports repayment ability")
 
-    if len(reasons)==0:
-        reasons.append("Applicant profile looks safe")
+    if interest > 15:
+        reasons.append("High interest rate indicates higher financial risk")
+    elif interest < 8:
+        reasons.append("Low interest rate indicates safer credit profile")
 
-    return jsonify({"reasons":reasons})
+    if home == "rent":
+        reasons.append("Renting home increases financial risk")
+    elif home == "own":
+        reasons.append("Home ownership improves financial stability")
+
+    if intent == "education":
+        reasons.append("Education loans are evaluated more flexibly")
+    elif intent == "business":
+        reasons.append("Business loans involve moderate financial uncertainty")
+    elif intent == "personal":
+        reasons.append("Personal loans require stronger repayment ability")
+
+    if grade in ["A","B"]:
+        reasons.append("High loan grade indicates strong credit quality")
+    elif grade in ["E","F","G"]:
+        reasons.append("Low loan grade increases default probability")
+
+    if default == "1":
+        reasons.append("Previous loan default negatively affects approval chances")
+
+    if loan_ratio > 0.8 and intent != "education":
+        reasons.append("Loan size is very high relative to income")
+    elif loan_ratio < 0.4:
+        reasons.append("Loan amount appears manageable relative to income")
+
+    if len(reasons) == 0:
+        reasons.append("Applicant financial profile appears balanced")
+
+    return jsonify({"reasons": reasons})
 
 
 # -----------------------------
