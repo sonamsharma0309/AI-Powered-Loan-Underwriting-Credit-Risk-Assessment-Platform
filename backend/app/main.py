@@ -9,7 +9,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
-from model_metrics import get_model_metrics
+from model_metrics import get_model_metrics, get_fairness_metrics
 
 app = Flask(__name__)
 CORS(app)
@@ -296,6 +296,17 @@ def analytics():
 def metrics():
     metrics_data = get_model_metrics()
     return jsonify(metrics_data)
+
+
+# -----------------------------
+# FAIRNESS MONITORING
+# -----------------------------
+@app.route("/fairness")
+def fairness():
+
+    fairness_data = get_fairness_metrics()
+
+    return jsonify(fairness_data)
 
 
 if __name__ == "__main__":
