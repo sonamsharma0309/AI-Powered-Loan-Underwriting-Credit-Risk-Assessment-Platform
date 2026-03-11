@@ -12,6 +12,7 @@ const navigate = useNavigate()
 const [email,setEmail]=useState("")
 const [password,setPassword]=useState("")
 const [message,setMessage]=useState("")
+const [loading,setLoading]=useState(false)
 
 const getStrength = ()=>{
 
@@ -24,10 +25,14 @@ return ""
 
 const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
+
 const handleRegister = async (e: React.FormEvent) => {
 
 e.preventDefault()
 
+console.log("REGISTER CLICKED")
+
+setLoading(true)
 setMessage("")
 
 try{
@@ -42,7 +47,11 @@ body:JSON.stringify({email,password})
 
 })
 
+console.log("STATUS:",res.status)
+
 const data = await res.json()
+
+console.log("DATA:",data)
 
 if(data.success){
 
@@ -52,15 +61,19 @@ setTimeout(()=>navigate("/"),1500)
 
 }else{
 
-setMessage(data.message)
+setMessage(data.message || "Registration failed")
 
 }
 
-}catch{
+}catch(err){
+
+console.error("ERROR:",err)
 
 setMessage("Server error")
 
 }
+
+setLoading(false)
 
 }
 
@@ -217,12 +230,14 @@ Password Strength :
 {/* REGISTER BUTTON */}
 
 <button
+type="submit"
+disabled={loading}
 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition p-3 rounded-xl flex items-center justify-center gap-2 font-semibold"
 >
 
 <UserPlus size={18}/>
 
-Create Account
+{loading ? "Creating..." : "Create Account"}
 
 </button>
 
