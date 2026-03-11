@@ -3,6 +3,9 @@ import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 
+import { signInWithPopup } from "firebase/auth"
+import { auth, provider } from "../firebase"
+
 export default function Login(){
 
 const navigate = useNavigate()
@@ -14,7 +17,10 @@ const [error,setError] = useState("")
 const [loading,setLoading] = useState(false)
 const [show,setShow] = useState(false)
 
-const API="https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com/";
+const API="https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
+
+
+/* EMAIL LOGIN */
 
 const handleLogin = async (e:any) => {
 
@@ -54,33 +60,64 @@ setLoading(false)
 
 }
 
+
+/* GOOGLE LOGIN */
+
+const handleGoogleLogin = async () => {
+
+setError("")
+
+try{
+
+const result = await signInWithPopup(auth,provider)
+
+const user = result.user
+
+const token = await user.getIdToken()
+
+setToken(token)
+
+navigate("/dashboard")
+
+}catch(err){
+
+console.log(err)
+setError("Google login failed")
+
+}
+
+}
+
+
 return(
 
-<div className="min-h-screen flex items-center justify-center text-white relative overflow-hidden">
+<div className="min-h-screen flex items-center justify-center relative overflow-hidden text-white">
 
-{/* Animated Background */}
+{/* BACKGROUND */}
 
-<div className="absolute inset-0 bg-gradient-to-br from-black via-slate-900 to-black"/>
+<div className="absolute inset-0 -z-10 bg-[#020617]" />
 
-<div className="absolute w-[600px] h-[600px] bg-purple-600 opacity-30 blur-[180px] -top-40 -left-40 animate-pulse"/>
+{/* Gradient blobs */}
 
-<div className="absolute w-[500px] h-[500px] bg-indigo-600 opacity-20 blur-[160px] bottom-0 right-0 animate-pulse"/>
+<div className="absolute w-[700px] h-[700px] bg-blue-500/40 blur-[160px] rounded-full animate-pulse top-[-100px] left-[-100px]" />
+
+<div className="absolute w-[700px] h-[700px] bg-purple-500/40 blur-[160px] rounded-full animate-pulse bottom-[-100px] right-[-100px]" />
+
+<div className="absolute w-[600px] h-[600px] bg-pink-500/30 blur-[140px] rounded-full animate-pulse top-[40%] left-[35%]" />
 
 
-{/* Floating Particles */}
+{/* Floating particles */}
 
-<div className="absolute inset-0 pointer-events-none">
+<div className="absolute inset-0">
 
-{[...Array(25)].map((_,i)=>(
+{[...Array(35)].map((_,i)=>(
 <div
 key={i}
-className="absolute bg-purple-400 opacity-20 rounded-full animate-ping"
+className="absolute w-[3px] h-[3px] bg-white/40 rounded-full animate-ping"
 style={{
-width: Math.random()*6+3,
-height: Math.random()*6+3,
-top: Math.random()*100+"%",
-left: Math.random()*100+"%",
-animationDuration: (Math.random()*4+2)+"s"
+top: `${Math.random()*100}%`,
+left: `${Math.random()*100}%`,
+animationDuration:`${2+Math.random()*3}s`
 }}
 />
 ))}
@@ -92,18 +129,19 @@ animationDuration: (Math.random()*4+2)+"s"
 
 <form
 onSubmit={handleLogin}
-className="relative bg-white/5 backdrop-blur-2xl border border-white/10 p-10 rounded-3xl w-[380px] space-y-6 shadow-2xl"
+className="relative bg-white/5 backdrop-blur-2xl border border-white/10 p-10 rounded-3xl w-[380px] space-y-6 shadow-[0_0_80px_rgba(139,92,246,0.35)]"
 >
+
 
 {/* TITLE */}
 
-<div className="text-center space-y-2">
+<div className="text-center">
 
-<h2 className="text-3xl font-bold text-purple-400">
+<h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
 CreditAI
 </h2>
 
-<p className="text-gray-400 text-sm">
+<p className="text-gray-400 text-sm mt-2">
 AI Powered Credit Risk Platform
 </p>
 
@@ -113,9 +151,11 @@ AI Powered Credit Risk Platform
 {/* ERROR */}
 
 {error && (
+
 <p className="text-red-400 text-sm text-center">
 {error}
 </p>
+
 )}
 
 
@@ -131,6 +171,7 @@ placeholder="Email address"
 className="w-full pl-10 p-3 rounded-xl bg-black/40 border border-white/10 focus:border-purple-500 outline-none"
 value={email}
 onChange={(e)=>setEmail(e.target.value)}
+required
 />
 
 </div>
@@ -148,6 +189,7 @@ placeholder="Password"
 className="w-full pl-10 pr-10 p-3 rounded-xl bg-black/40 border border-white/10 focus:border-purple-500 outline-none"
 value={password}
 onChange={(e)=>setPassword(e.target.value)}
+required
 />
 
 <div
@@ -166,14 +208,10 @@ className="absolute right-3 top-3 cursor-pointer text-gray-400"
 
 <button
 type="submit"
-className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition p-3 rounded-xl font-semibold flex items-center justify-center"
+className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition p-3 rounded-xl font-semibold"
 >
 
-{loading ? (
-<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
-) : (
-"Login"
-)}
+{loading ? "Loading..." : "Login"}
 
 </button>
 
@@ -191,12 +229,18 @@ OR
 </div>
 
 
-{/* GOOGLE BUTTON UI */}
+{/* GOOGLE LOGIN */}
 
 <button
 type="button"
+onClick={handleGoogleLogin}
 className="flex items-center justify-center gap-2 w-full bg-white text-black p-3 rounded-xl font-semibold hover:bg-gray-200 transition"
 >
+
+<img
+src="https://www.svgrepo.com/show/475656/google-color.svg"
+className="w-5"
+/>
 
 Continue with Google
 
@@ -225,5 +269,4 @@ Register
 </div>
 
 )
-
 }

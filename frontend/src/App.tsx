@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -40,6 +41,15 @@ function App() {
           <>
             <Route
               path="/"
+              element={
+                <AnimatedPage>
+                  <Landing />
+                </AnimatedPage>
+              }
+            />
+
+            <Route
+              path="/login"
               element={
                 <AnimatedPage>
                   <Login />
