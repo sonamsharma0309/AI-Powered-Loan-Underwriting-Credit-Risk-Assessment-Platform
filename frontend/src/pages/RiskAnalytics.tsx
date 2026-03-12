@@ -23,7 +23,7 @@ risk:number
 
 const API =
 import.meta.env.VITE_API_URL ||
-"http://127.0.0.1:5000"
+"https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com/"
 
 export default function RiskAnalytics(){
 
