@@ -10,6 +10,8 @@ import RiskAnalytics from "./pages/RiskAnalytics";
 import LoanAssessment from "./pages/LoanAssessment";
 import Applications from "./pages/Applications";
 import AuditLogs from "./pages/AuditLogs";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
 import MainLayout from "./layout/MainLayout";
 
@@ -76,6 +78,11 @@ function App() {
           <Route path="/" element={<MainLayout />}>
 
             <Route
+              index
+              element={<Navigate to="/dashboard" />}
+            />
+
+            <Route
               path="dashboard"
               element={
                 <AnimatedPage>
@@ -116,6 +123,24 @@ function App() {
               element={
                 <AnimatedPage>
                   <AuditLogs />
+                </AnimatedPage>
+              }
+            />
+
+            <Route
+              path="profile"
+              element={
+                <AnimatedPage>
+                  <Profile />
+                </AnimatedPage>
+              }
+            />
+
+            <Route
+              path="settings"
+              element={
+                <AnimatedPage>
+                  <Settings />
                 </AnimatedPage>
               }
             />
