@@ -8,7 +8,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
-from model_metrics import get_model_metrics, get_fairness_metrics
+from app.model_metrics import get_model_metrics, get_fairness_metrics
 from explainability import explain_decision
 
 app = Flask(__name__)
