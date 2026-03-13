@@ -22,7 +22,7 @@ const [explanation,setExplanation]=useState<string[]>([])
 const [loading,setLoading]=useState(false)
 const [error,setError]=useState("")
 
-const API="http://127.0.0.1:5000"
+const API="https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
 const handleChange=(e:any)=>{
 setForm({...form,[e.target.name]:e.target.value})

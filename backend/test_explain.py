@@ -1,6 +1,6 @@
 import requests
 
-url = "http://127.0.0.1:5000/explain"
+url = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com/explain"
 
 data = {
     "income":60000,
