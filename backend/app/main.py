@@ -227,33 +227,68 @@ def login():
 # LOAN PREDICTION
 # -----------------------------
 @app.route("/predict", methods=["POST","OPTIONS"])
-@limiter.limit("20 per minute")
+@limiter.limit("20 per minute", exempt_when=lambda: request.method == "OPTIONS")
 def predict():
 
     try:
-
         data = request.get_json()
 
         name = data.get("name", "Applicant")
         age = float(data.get("age", 30))
         income = float(data.get("income", 50000))
         loan = float(data.get("loanAmount", 10000))
-
-        credit = float(data.get("creditHistory", 5))
         employment = float(data.get("employmentYears", 5))
         interest = float(data.get("interestRate", 8))
+        credit = float(data.get("creditHistory", 5))
 
-        if income <= 0 or loan <= 0:
-            return jsonify({"error": "Income and loan must be positive"}), 400
+        home = data.get("homeOwnership")
+        intent = data.get("loanIntent")
+        grade = data.get("loanGrade")
+        default = data.get("previousDefault")
 
-        if age < 18:
-            return jsonify({"error": "Applicant must be at least 18"}), 400
-
-        live_income_values.append(income)
+        # -----------------------------
+        # FEATURE ENGINEERING
+        # -----------------------------
 
         loan_percent_income = loan / income
-        loan_to_income_ratio = loan / income
-        interest_income_ratio = interest / income
+        loan_to_income = loan / income
+        interest_loan_ratio = interest / loan
+        credit_history_ratio = credit / age
+        emp_age_ratio = employment / age
+
+        # -----------------------------
+        # HOME OWNERSHIP
+        # -----------------------------
+
+        home_rent = 1 if home == "rent" else 0
+        home_own = 1 if home == "own" else 0
+        home_other = 1 if home == "mortgage" else 0
+
+        # -----------------------------
+        # LOAN INTENT
+        # -----------------------------
+
+        intent_edu = 1 if intent == "education" else 0
+        intent_med = 1 if intent == "medical" else 0
+        intent_personal = 1 if intent == "personal" else 0
+        intent_business = 1 if intent == "business" else 0
+
+        # -----------------------------
+        # LOAN GRADE
+        # -----------------------------
+
+        grade_B = 1 if grade == "B" else 0
+        grade_C = 1 if grade == "C" else 0
+        grade_D = 1 if grade == "D" else 0
+        grade_E = 1 if grade == "E" else 0
+        grade_F = 1 if grade == "F" else 0
+        grade_G = 1 if grade == "G" else 0
+
+        default_flag = 1 if default == "1" else 0
+
+        # -----------------------------
+        # MODEL INPUT
+        # -----------------------------
 
         row = {
             "person_age": age,
@@ -263,27 +298,30 @@ def predict():
             "loan_int_rate": interest,
             "loan_percent_income": loan_percent_income,
             "cb_person_cred_hist_length": credit,
-            "loan_to_income_ratio": loan_to_income_ratio,
-            "interest_income_ratio": interest_income_ratio,
 
-            "person_home_ownership_OTHER": 0,
-            "person_home_ownership_OWN": 0,
-            "person_home_ownership_RENT": 1,
+            "loan_to_income": loan_to_income,
+            "interest_loan_ratio": interest_loan_ratio,
+            "credit_history_ratio": credit_history_ratio,
+            "emp_age_ratio": emp_age_ratio,
 
-            "loan_intent_EDUCATION": 0,
+            "person_home_ownership_OTHER": home_other,
+            "person_home_ownership_OWN": home_own,
+            "person_home_ownership_RENT": home_rent,
+
+            "loan_intent_EDUCATION": intent_edu,
             "loan_intent_HOMEIMPROVEMENT": 0,
-            "loan_intent_MEDICAL": 0,
-            "loan_intent_PERSONAL": 1,
-            "loan_intent_VENTURE": 0,
+            "loan_intent_MEDICAL": intent_med,
+            "loan_intent_PERSONAL": intent_personal,
+            "loan_intent_VENTURE": intent_business,
 
-            "loan_grade_B": 0,
-            "loan_grade_C": 0,
-            "loan_grade_D": 0,
-            "loan_grade_E": 0,
-            "loan_grade_F": 0,
-            "loan_grade_G": 0,
+            "loan_grade_B": grade_B,
+            "loan_grade_C": grade_C,
+            "loan_grade_D": grade_D,
+            "loan_grade_E": grade_E,
+            "loan_grade_F": grade_F,
+            "loan_grade_G": grade_G,
 
-            "cb_person_default_on_file_Y": 0
+            "cb_person_default_on_file_Y": default_flag
         }
 
         df = pd.DataFrame([row])
@@ -292,40 +330,20 @@ def predict():
         prediction = 1 if prob >= 0.4 else 0
 
         risk_score = round(prob * 100, 2)
-        approval_probability = round((1 - prob) * 100, 2)
-
         decision = "Approved" if prediction == 0 else "Rejected"
-
-        conn = get_db()
-
-        conn.execute(
-            "INSERT INTO applications(name,age,income,loan,decision,risk) VALUES (?,?,?,?,?,?)",
-            (name, age, income, loan, decision, risk_score)
-        )
-
-        conn.commit()
-        conn.close()
-
-        log_event(
-            "LOAN_PREDICTION",
-            f"{name} | loan={loan} | risk={risk_score} | decision={decision}"
-        )
 
         return jsonify({
             "risk_score": risk_score,
-            "approval_probability": approval_probability,
             "decision": decision
         })
 
     except Exception as e:
-
         print("Prediction error:", e)
 
         return jsonify({
             "error": "Prediction failed",
             "details": str(e)
         }), 500
-
 
 # -----------------------------
 # GET ALL APPLICATIONS
