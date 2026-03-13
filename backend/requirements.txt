@@ -1,31 +1,43 @@
+# API
 fastapi
-uvicorn
+uvicorn[standard]
 
+# ML / Data
 pandas
 numpy
 scikit-learn
+scipy
 xgboost
 joblib
 shap
+numba
+llvmlite
+tqdm
 
+# File uploads
 python-multipart
 
+# Flask services
 flask
 flask-cors
-gunicorn
 flask-limiter
+gunicorn
 
-# authentication
+# Authentication
 flask-jwt-extended
 bcrypt
 
-# database
+# Database
 sqlalchemy
 psycopg2-binary
 
-# utilities
+# Utilities
 python-dotenv
 pydantic
+email-validator
 
-pytest
+# HTTP
 requests
+
+# Testing
+pytest
