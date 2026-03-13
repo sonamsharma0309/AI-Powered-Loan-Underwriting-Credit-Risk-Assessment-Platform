@@ -1,11 +1,21 @@
 def explain_decision(applicant_data):
 
     try:
-        income = float(applicant_data.get("income", 0))
-        loan = float(applicant_data.get("loanAmount", 0))
-        credit = float(applicant_data.get("creditHistory", 0))
-        age = float(applicant_data.get("age", 0))
-    except:
+
+        # -------------------------
+        # Safe input extraction
+        # -------------------------
+
+        income = float(applicant_data.get("income", 0) or 0)
+        loan = float(applicant_data.get("loanAmount", 0) or 0)
+        credit = float(applicant_data.get("creditHistory", 0) or 0)
+        age = float(applicant_data.get("age", 0) or 0)
+
+        if income < 0 or loan < 0:
+            raise ValueError("Negative values not allowed")
+
+    except Exception:
+
         return {
             "reasons": ["Invalid input data"],
             "feature_importance": {}
@@ -29,18 +39,24 @@ def explain_decision(applicant_data):
     if income > 0 and loan > income:
         reasons.append("Loan amount exceeds income which increases risk")
 
-    if len(reasons) == 0:
+    if not reasons:
         reasons.append("Applicant financial profile appears balanced")
+
+    # -------------------------
+    # Safe denominator
+    # -------------------------
+
+    denominator = income + loan + 1
 
     # -------------------------
     # Feature importance
     # -------------------------
 
     feature_importance = {
-        "income_impact": round(income / (income + loan + 1), 2),
-        "loan_amount_impact": round(loan / (income + loan + 1), 2),
-        "credit_history_impact": round(credit / 20, 2),
-        "age_impact": round(age / 100, 2)
+        "income_impact": round(income / denominator, 2),
+        "loan_amount_impact": round(loan / denominator, 2),
+        "credit_history_impact": round(min(credit / 20, 1), 2),
+        "age_impact": round(min(age / 100, 1), 2)
     }
 
     return {
