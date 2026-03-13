@@ -10,6 +10,7 @@ income:"",
 loanAmount:"",
 employmentYears:"",
 interestRate:"",
+creditHistory:"5",
 homeOwnership:"",
 loanIntent:"",
 loanGrade:"",
@@ -100,8 +101,6 @@ return(
 
 <div className="p-10 space-y-10">
 
-{/* PAGE HEADER */}
-
 <div>
 
 <h1 className="text-3xl font-semibold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
@@ -117,8 +116,6 @@ Evaluate borrower profile and generate AI credit risk decision
 
 <div className="grid lg:grid-cols-2 gap-8">
 
-
-{/* FORM PANEL */}
 
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-xl shadow-xl">
 
@@ -166,6 +163,13 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purpl
 <input
 name="interestRate"
 placeholder="Interest Rate (%)"
+onChange={handleChange}
+className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
+/>
+
+<input
+name="creditHistory"
+placeholder="Credit History Length"
 onChange={handleChange}
 className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
 />
@@ -234,8 +238,6 @@ className="mt-6 w-full p-3 rounded-lg font-semibold bg-gradient-to-r from-purple
 </div>
 
 
-{/* RESULT PANEL */}
-
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-xl shadow-xl">
 
 <div className="flex items-center justify-between">
@@ -276,9 +278,6 @@ ${decision==="Approved"
 
 </div>
 
-
-{/* RISK BAR */}
-
 <div className="mt-6">
 
 <div className="flex justify-between text-sm text-gray-400">
@@ -299,8 +298,6 @@ style={{width:`${risk}%`}}
 
 </div>
 
-
-{/* EXPLAINABILITY */}
 
 <div className="mt-8">
 

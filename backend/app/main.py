@@ -12,18 +12,22 @@ from app.model_metrics import get_model_metrics, get_fairness_metrics
 from app.explainability import explain_decision
 
 app = Flask(__name__)
-CORS(app)
+
+# -----------------------------
+# CORS CONFIG
+# -----------------------------
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=True
+)
 
 limiter = Limiter(get_remote_address, app=app)
 
 model = joblib.load("models/risk_model_optimized.pkl")
 
-# -----------------------------
-# DRIFT TRACKING
-# -----------------------------
 training_income_avg = 50000
 live_income_values = []
-
 
 # -----------------------------
 # SECURITY HEADERS
@@ -46,7 +50,7 @@ def get_db():
 
 
 # -----------------------------
-# AUDIT LOG FUNCTION
+# AUDIT LOG
 # -----------------------------
 def log_event(event, details):
 
@@ -82,7 +86,7 @@ def is_admin(email):
 
 
 # -----------------------------
-# DATABASE INIT
+# INIT DATABASE
 # -----------------------------
 def init_db():
 
@@ -131,7 +135,7 @@ def home():
 
 
 # -----------------------------
-# SYSTEM HEALTH CHECK
+# HEALTH CHECK
 # -----------------------------
 @app.route("/health")
 def health():
@@ -148,7 +152,8 @@ def health():
 @limiter.limit("10 per minute")
 def register():
 
-    data = request.json
+    data = request.json or {}
+
     email = data.get("email")
     password = data.get("password")
     role = data.get("role", "user")
@@ -189,7 +194,7 @@ def register():
 @limiter.limit("10 per minute")
 def login():
 
-    data = request.json
+    data = request.json or {}
 
     email = data.get("email")
     password = data.get("password")
@@ -220,7 +225,7 @@ def login():
 
 
 # -----------------------------
-# LOAN PREDICTION
+# LOAN PREDICTION (UPDATED)
 # -----------------------------
 @app.route("/predict", methods=["POST"])
 @limiter.limit("20 per minute")
@@ -228,24 +233,22 @@ def predict():
 
     try:
 
-        data = request.json
+        data = request.json or {}
 
-        name = data.get("name", "Applicant")
-        age = float(data.get("age", 30))
-        income = float(data.get("income", 50000))
-        loan = float(data.get("loanAmount", 10000))
+        name = data.get("name") or "Applicant"
 
-        credit = float(data.get("creditHistory", 5))
-        employment = float(data.get("employmentYears", 5))
-        interest = float(data.get("interestRate", 8))
+        age = float(data.get("age") or 30)
+        income = float(data.get("income") or 50000)
+        loan = float(data.get("loanAmount") or 10000)
 
-        if income <= 0 or loan <= 0:
-            return jsonify({"error": "Income and loan must be positive"}), 400
+        credit = float(data.get("creditHistory") or 5)
+        employment = float(data.get("employmentYears") or 5)
+        interest = float(data.get("interestRate") or 8)
 
-        if age < 18:
-            return jsonify({"error": "Applicant must be at least 18"}), 400
-
-        live_income_values.append(income)
+        home = (data.get("homeOwnership") or "rent").lower()
+        intent = (data.get("loanIntent") or "personal").lower()
+        grade = (data.get("loanGrade") or "B").upper()
+        default = int(data.get("previousDefault") or 0)
 
         loan_percent_income = loan / income
         loan_to_income_ratio = loan / income
@@ -262,24 +265,24 @@ def predict():
             "loan_to_income_ratio": loan_to_income_ratio,
             "interest_income_ratio": interest_income_ratio,
 
-            "person_home_ownership_OTHER": 0,
-            "person_home_ownership_OWN": 0,
-            "person_home_ownership_RENT": 1,
+            "person_home_ownership_OTHER": 1 if home == "other" else 0,
+            "person_home_ownership_OWN": 1 if home == "own" else 0,
+            "person_home_ownership_RENT": 1 if home == "rent" else 0,
 
-            "loan_intent_EDUCATION": 0,
-            "loan_intent_HOMEIMPROVEMENT": 0,
-            "loan_intent_MEDICAL": 0,
-            "loan_intent_PERSONAL": 1,
-            "loan_intent_VENTURE": 0,
+            "loan_intent_EDUCATION": 1 if intent == "education" else 0,
+            "loan_intent_HOMEIMPROVEMENT": 1 if intent == "homeimprovement" else 0,
+            "loan_intent_MEDICAL": 1 if intent == "medical" else 0,
+            "loan_intent_PERSONAL": 1 if intent == "personal" else 0,
+            "loan_intent_VENTURE": 1 if intent == "venture" else 0,
 
-            "loan_grade_B": 0,
-            "loan_grade_C": 0,
-            "loan_grade_D": 0,
-            "loan_grade_E": 0,
-            "loan_grade_F": 0,
-            "loan_grade_G": 0,
+            "loan_grade_B": 1 if grade == "B" else 0,
+            "loan_grade_C": 1 if grade == "C" else 0,
+            "loan_grade_D": 1 if grade == "D" else 0,
+            "loan_grade_E": 1 if grade == "E" else 0,
+            "loan_grade_F": 1 if grade == "F" else 0,
+            "loan_grade_G": 1 if grade == "G" else 0,
 
-            "cb_person_default_on_file_Y": 0
+            "cb_person_default_on_file_Y": 1 if default == 1 else 0
         }
 
         df = pd.DataFrame([row])
@@ -302,11 +305,6 @@ def predict():
         conn.commit()
         conn.close()
 
-        log_event(
-            "LOAN_PREDICTION",
-            f"{name} | loan={loan} | risk={risk_score} | decision={decision}"
-        )
-
         return jsonify({
             "risk_score": risk_score,
             "approval_probability": approval_probability,
@@ -324,156 +322,8 @@ def predict():
 
 
 # -----------------------------
-# GET ALL APPLICATIONS
+# RUN SERVER
 # -----------------------------
-@app.route("/applications", methods=["GET"])
-def get_applications():
-
-    conn = get_db()
-
-    rows = conn.execute(
-        "SELECT name, age, income, loan, decision, risk FROM applications ORDER BY id DESC"
-    ).fetchall()
-
-    conn.close()
-
-    applications = []
-
-    for r in rows:
-        applications.append({
-            "name": r["name"],
-            "age": r["age"],
-            "income": r["income"],
-            "loan": r["loan"],
-            "decision": r["decision"],
-            "risk": r["risk"]
-        })
-
-    return jsonify(applications)
-
-
-# -----------------------------
-# AUDIT LOGS API
-# -----------------------------
-@app.route("/audit", methods=["GET"])
-def audit_logs():
-
-    conn = get_db()
-
-    rows = conn.execute(
-        "SELECT event, details, timestamp FROM audit_logs ORDER BY id DESC LIMIT 50"
-    ).fetchall()
-
-    conn.close()
-
-    logs = []
-
-    for r in rows:
-        logs.append({
-            "event": r["event"],
-            "details": r["details"],
-            "time": r["timestamp"]
-        })
-
-    return jsonify(logs)
-
-
-# -----------------------------
-# DASHBOARD ANALYTICS
-# -----------------------------
-@app.route("/analytics", methods=["GET"])
-def analytics():
-
-    conn = get_db()
-
-    rows = conn.execute("SELECT decision, risk FROM applications").fetchall()
-
-    conn.close()
-
-    total = len(rows)
-
-    approved = sum(1 for r in rows if r["decision"] == "Approved")
-    rejected = sum(1 for r in rows if r["decision"] == "Rejected")
-
-    avg_risk = round(sum(r["risk"] for r in rows) / total, 2) if total > 0 else 0
-
-    return jsonify({
-        "total_applications": total,
-        "approved_loans": approved,
-        "rejected_loans": rejected,
-        "average_risk": avg_risk
-    })
-
-
-# -----------------------------
-# AI EXPLANATION
-# -----------------------------
-@app.route("/explain", methods=["POST"])
-def explain():
-
-    data = request.json
-
-    explanation = explain_decision(data)
-
-    return jsonify(explanation)
-
-
-# -----------------------------
-# MODEL METRICS
-# -----------------------------
-@app.route("/metrics")
-def metrics():
-
-    email = request.args.get("email")
-
-    if not is_admin(email):
-        return jsonify({"error": "Admin access required"}), 403
-
-    metrics_data = get_model_metrics()
-
-    return jsonify(metrics_data)
-
-
-# -----------------------------
-# FAIRNESS MONITORING
-# -----------------------------
-@app.route("/fairness")
-def fairness():
-
-    email = request.args.get("email")
-
-    if not is_admin(email):
-        return jsonify({"error": "Admin access required"}), 403
-
-    fairness_data = get_fairness_metrics()
-
-    return jsonify(fairness_data)
-
-
-# -----------------------------
-# MODEL DRIFT MONITORING
-# -----------------------------
-@app.route("/drift")
-def drift():
-
-    if len(live_income_values) == 0:
-        return jsonify({
-            "training_income_avg": training_income_avg,
-            "live_income_avg": 0,
-            "drift_detected": False
-        })
-
-    live_avg = sum(live_income_values) / len(live_income_values)
-
-    drift = abs(live_avg - training_income_avg) > (0.3 * training_income_avg)
-
-    return jsonify({
-        "training_income_avg": training_income_avg,
-        "live_income_avg": round(live_avg,2),
-        "drift_detected": drift
-    })
-
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
