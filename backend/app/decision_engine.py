@@ -3,42 +3,96 @@ import os
 import numpy as np
 import shap
 
-# Go one level up from app → backend
+# -----------------------------
+# PATH CONFIGURATION
+# -----------------------------
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MODEL_PATH = os.path.join(BASE_DIR, "models", "risk_model_optimized.pkl")
 PREPROCESSOR_PATH = os.path.join(BASE_DIR, "models", "preprocessor.pkl")
 
+
+# -----------------------------
+# SAFE MODEL LOADING
+# -----------------------------
+
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"Model not found: {MODEL_PATH}")
+
+if not os.path.exists(PREPROCESSOR_PATH):
+    raise FileNotFoundError(f"Preprocessor not found: {PREPROCESSOR_PATH}")
+
 model = joblib.load(MODEL_PATH)
 preprocessor = joblib.load(PREPROCESSOR_PATH)
 
-# SHAP explainer initialize
-explainer = shap.TreeExplainer(model)
 
+# -----------------------------
+# SHAP EXPLAINER
+# -----------------------------
+
+try:
+    explainer = shap.TreeExplainer(model)
+except Exception:
+    explainer = None
+
+
+# -----------------------------
+# MAIN DECISION FUNCTION
+# -----------------------------
 
 def make_decision(applicant_data):
 
-    input_data = np.array([list(applicant_data.values())])
-    processed = preprocessor.transform(input_data)
+    try:
 
-    prediction = model.predict(processed)[0]
-    probability = model.predict_proba(processed)[0][1]
+        if not isinstance(applicant_data, dict):
+            raise ValueError("Applicant data must be a dictionary")
 
-    decision = "Approved" if prediction == 1 else "Rejected"
+        feature_names = list(applicant_data.keys())
 
-    # SHAP explanation
-    shap_values = explainer.shap_values(processed)
+        input_values = list(applicant_data.values())
 
-    feature_importance = {}
+        input_array = np.array([input_values])
 
-    if isinstance(shap_values, list):
-        shap_values = shap_values[1]
+        processed = preprocessor.transform(input_array)
 
-    for i, feature in enumerate(applicant_data.keys()):
-        feature_importance[feature] = float(shap_values[0][i])
+        prediction = model.predict(processed)[0]
 
-    return {
-        "decision": decision,
-        "risk_score": float(probability),
-        "feature_importance": feature_importance
-    }
+        probability = float(model.predict_proba(processed)[0][1])
+
+        decision = "Approved" if prediction == 1 else "Rejected"
+
+        feature_importance = {}
+
+        # -----------------------------
+        # SHAP EXPLANATION
+        # -----------------------------
+
+        if explainer:
+
+            shap_values = explainer.shap_values(processed)
+
+            if isinstance(shap_values, list):
+                shap_values = shap_values[1]
+
+            for i, feature in enumerate(feature_names):
+
+                try:
+                    feature_importance[feature] = float(shap_values[0][i])
+                except:
+                    feature_importance[feature] = 0.0
+
+        return {
+            "decision": decision,
+            "risk_score": probability,
+            "feature_importance": feature_importance
+        }
+
+    except Exception as e:
+
+        return {
+            "decision": "Error",
+            "risk_score": 0,
+            "feature_importance": {},
+            "error": str(e)
+        }
