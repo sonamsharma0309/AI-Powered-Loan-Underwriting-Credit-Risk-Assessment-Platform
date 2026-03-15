@@ -330,6 +330,24 @@ def predict():
 
         decision = "Approved" if prediction == 0 else "Rejected"
 
+        # ADD THIS BLOCK TO SAVE DATA
+       # -----------------------------
+        conn = get_db()
+        conn.execute("""
+        INSERT INTO applications(name, age, income, loan, decision, risk)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+        data.get("name", "Unknown"),  # make sure frontend sends 'name'
+        age,
+        income,
+        loan,
+        decision,
+        risk_score
+))
+        conn.commit()
+        conn.close()
+# -----------------------------
+
         return jsonify({
             "risk_score": risk_score,
             "decision": decision
