@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import {
   BarChart,
   Bar,
@@ -11,122 +12,169 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   Legend,
-} from "recharts";
+} from "recharts"
 
-const data = [
-  { month: "Jan", loans: 40, risk: 24 },
-  { month: "Feb", loans: 32, risk: 13 },
-  { month: "Mar", loans: 51, risk: 35 },
-  { month: "Apr", loans: 27, risk: 19 },
-  { month: "May", loans: 44, risk: 28 },
-  { month: "Jun", loans: 36, risk: 21 },
-];
+interface Application {
+  name: string
+  age: number
+  income: number
+  loan: number
+  decision: string
+  risk: number
+}
+
+const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
 export default function Analytics() {
-  return (
-    <div className="p-8 space-y-8">
 
-      {/* PAGE TITLE */}
+const [apps,setApps] = useState<Application[]>([])
+const [loading,setLoading] = useState(true)
 
-      <div>
-        <h1 className="text-3xl font-bold">Advanced Analytics</h1>
-        <p className="text-gray-500">
-          Credit risk insights and loan performance overview
-        </p>
-      </div>
+useEffect(()=>{
 
-      {/* KPI CARDS */}
+fetch(`${API}/analytics`)
+.then(res=>res.json())
+.then(data=>{
+setApps(data)
+setLoading(false)
+})
+.catch(err=>{
+console.error(err)
+setLoading(false)
+})
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+},[])
 
-        <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
-          <p className="text-gray-500 text-sm">Total Loans</p>
-          <h2 className="text-3xl font-bold mt-2">1,284</h2>
-        </div>
+if(loading){
+return(
+<div className="p-10 text-center text-gray-400">
+Loading Analytics...
+</div>
+)
+}
 
-        <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
-          <p className="text-gray-500 text-sm">Approval Rate</p>
-          <h2 className="text-3xl font-bold mt-2 text-green-500">78%</h2>
-        </div>
+const totalLoans = apps.reduce((s,a)=>s+a.loan,0)
 
-        <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
-          <p className="text-gray-500 text-sm">Risk Score Avg</p>
-          <h2 className="text-3xl font-bold mt-2 text-red-500">42</h2>
-        </div>
+const approved = apps.filter(a=>a.decision==="Approved").length
 
-        <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
-          <p className="text-gray-500 text-sm">Active Clients</p>
-          <h2 className="text-3xl font-bold mt-2">356</h2>
-        </div>
+const approvalRate = apps.length
+? ((approved/apps.length)*100).toFixed(1)
+:0
 
-      </div>
+const avgRisk = apps.length
+? (apps.reduce((s,a)=>s+a.risk,0)/apps.length).toFixed(1)
+:0
 
-      {/* CHARTS GRID */}
+// chart data
+const chartData = apps.map((a,i)=>({
+name:a.name,
+loan:a.loan,
+risk:a.risk
+}))
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+return (
 
-        {/* BAR CHART */}
+<div className="p-8 space-y-8">
 
-        <div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
-          <h2 className="mb-4 font-semibold text-lg">Loan Approvals</h2>
+<div>
+<h1 className="text-3xl font-bold">Advanced Analytics</h1>
+<p className="text-gray-500">
+Credit risk insights and loan performance overview
+</p>
+</div>
 
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
+{/* KPI CARDS */}
 
-              <Bar dataKey="loans" fill="#6366f1" radius={[6,6,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        {/* PIE CHART */}
+<div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
+<p className="text-gray-500 text-sm">Total Loans</p>
+<h2 className="text-3xl font-bold mt-2">${totalLoans.toLocaleString()}</h2>
+</div>
 
-        <div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
-          <h2 className="mb-4 font-semibold text-lg">Risk Distribution</h2>
+<div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
+<p className="text-gray-500 text-sm">Approval Rate</p>
+<h2 className="text-3xl font-bold mt-2 text-green-500">{approvalRate}%</h2>
+</div>
 
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={data}
-                dataKey="risk"
-                nameKey="month"
-                outerRadius={120}
-                fill="#22c55e"
-                label
-              />
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+<div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
+<p className="text-gray-500 text-sm">Risk Score Avg</p>
+<h2 className="text-3xl font-bold mt-2 text-red-500">{avgRisk}</h2>
+</div>
 
-      </div>
+<div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
+<p className="text-gray-500 text-sm">Applications</p>
+<h2 className="text-3xl font-bold mt-2">{apps.length}</h2>
+</div>
 
-      {/* AREA CHART */}
+</div>
 
-      <div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
-        <h2 className="mb-4 font-semibold text-lg">Risk Trend</h2>
+{/* CHARTS */}
 
-        <ResponsiveContainer width="100%" height={320}>
-          <AreaChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-            <Area
-              type="monotone"
-              dataKey="risk"
-              stroke="#ef4444"
-              fill="#fecaca"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+<div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
+<h2 className="mb-4 font-semibold text-lg">Loan Amounts</h2>
 
-    </div>
-  );
+<ResponsiveContainer width="100%" height={300}>
+<BarChart data={chartData}>
+<CartesianGrid strokeDasharray="3 3"/>
+<XAxis dataKey="name"/>
+<YAxis/>
+<Tooltip/>
+<Legend/>
+
+<Bar dataKey="loan" fill="#6366f1"/>
+</BarChart>
+</ResponsiveContainer>
+
+</div>
+
+<div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
+<h2 className="mb-4 font-semibold text-lg">Risk Distribution</h2>
+
+<ResponsiveContainer width="100%" height={300}>
+<PieChart>
+<Pie
+data={chartData}
+dataKey="risk"
+nameKey="name"
+outerRadius={120}
+fill="#22c55e"
+label
+/>
+<Tooltip/>
+</PieChart>
+</ResponsiveContainer>
+
+</div>
+
+</div>
+
+<div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
+<h2 className="mb-4 font-semibold text-lg">Risk Trend</h2>
+
+<ResponsiveContainer width="100%" height={320}>
+<AreaChart data={chartData}>
+<CartesianGrid strokeDasharray="3 3"/>
+<XAxis dataKey="name"/>
+<YAxis/>
+<Tooltip/>
+
+<Area
+type="monotone"
+dataKey="risk"
+stroke="#ef4444"
+fill="#fecaca"
+/>
+
+</AreaChart>
+</ResponsiveContainer>
+
+</div>
+
+</div>
+
+)
+
 }

@@ -11,23 +11,26 @@ import os
 from app.model_metrics import get_model_metrics, get_fairness_metrics
 from app.explainability import explain_decision
 
-app = Flask(__name__)
+app = Flask(_name_)
 
-# -----------------------------
-# CORS CONFIG
-# -----------------------------
 CORS(
     app,
-    resources={r"/*": {"origins": "*"}},
-    supports_credentials=True
+    supports_credentials=True,
+    origins=[
+        "https://ai-powered-loan-underwriting-credit.vercel.app"
+    ]
 )
 
 limiter = Limiter(get_remote_address, app=app)
 
 model = joblib.load("models/risk_model_optimized.pkl")
 
+# -----------------------------
+# DRIFT TRACKING
+# -----------------------------
 training_income_avg = 50000
 live_income_values = []
+
 
 # -----------------------------
 # SECURITY HEADERS
@@ -135,7 +138,7 @@ def home():
 
 
 # -----------------------------
-# HEALTH CHECK
+# HEALTH
 # -----------------------------
 @app.route("/health")
 def health():
@@ -148,11 +151,14 @@ def health():
 # -----------------------------
 # REGISTER
 # -----------------------------
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["POST", "OPTIONS"])
 @limiter.limit("10 per minute")
 def register():
 
-    data = request.json or {}
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
+
+    data = request.json
 
     email = data.get("email")
     password = data.get("password")
@@ -190,11 +196,14 @@ def register():
 # -----------------------------
 # LOGIN
 # -----------------------------
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["POST", "OPTIONS"])
 @limiter.limit("10 per minute")
 def login():
 
-    data = request.json or {}
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
+
+    data = request.json
 
     email = data.get("email")
     password = data.get("password")
@@ -225,34 +234,54 @@ def login():
 
 
 # -----------------------------
-# LOAN PREDICTION (UPDATED)
+# PREDICT
 # -----------------------------
-@app.route("/predict", methods=["POST"])
-@limiter.limit("20 per minute")
+@app.route("/predict", methods=["POST", "OPTIONS"])
+@limiter.limit("20 per minute", exempt_when=lambda: request.method == "OPTIONS")
 def predict():
+
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
 
     try:
 
-        data = request.json or {}
+        data = request.get_json()
 
-        name = data.get("name") or "Applicant"
+        age = float(data.get("age", 30))
+        income = float(data.get("income", 50000))
+        loan = float(data.get("loanAmount", 10000))
+        employment = float(data.get("employmentYears", 5))
+        interest = float(data.get("interestRate", 8))
+        credit = float(data.get("creditHistory", 5))
 
-        age = float(data.get("age") or 30)
-        income = float(data.get("income") or 50000)
-        loan = float(data.get("loanAmount") or 10000)
-
-        credit = float(data.get("creditHistory") or 5)
-        employment = float(data.get("employmentYears") or 5)
-        interest = float(data.get("interestRate") or 8)
-
-        home = (data.get("homeOwnership") or "rent").lower()
-        intent = (data.get("loanIntent") or "personal").lower()
-        grade = (data.get("loanGrade") or "B").upper()
-        default = int(data.get("previousDefault") or 0)
+        home = data.get("homeOwnership")
+        intent = data.get("loanIntent")
+        grade = data.get("loanGrade")
+        default = data.get("previousDefault")
 
         loan_percent_income = loan / income
-        loan_to_income_ratio = loan / income
-        interest_income_ratio = interest / income
+        loan_to_income = loan / income
+        credit_history_ratio = credit / age
+        emp_age_ratio = employment / age
+        interest_loan_ratio = interest / loan
+
+        home_rent = 1 if home == "rent" else 0
+        home_own = 1 if home == "own" else 0
+        home_other = 1 if home == "mortgage" else 0
+
+        intent_edu = 1 if intent == "education" else 0
+        intent_med = 1 if intent == "medical" else 0
+        intent_personal = 1 if intent == "personal" else 0
+        intent_business = 1 if intent == "business" else 0
+
+        grade_B = 1 if grade == "B" else 0
+        grade_C = 1 if grade == "C" else 0
+        grade_D = 1 if grade == "D" else 0
+        grade_E = 1 if grade == "E" else 0
+        grade_F = 1 if grade == "F" else 0
+        grade_G = 1 if grade == "G" else 0
+
+        default_flag = 1 if default == "1" else 0
 
         row = {
             "person_age": age,
@@ -262,52 +291,65 @@ def predict():
             "loan_int_rate": interest,
             "loan_percent_income": loan_percent_income,
             "cb_person_cred_hist_length": credit,
-            "loan_to_income_ratio": loan_to_income_ratio,
-            "interest_income_ratio": interest_income_ratio,
 
-            "person_home_ownership_OTHER": 1 if home == "other" else 0,
-            "person_home_ownership_OWN": 1 if home == "own" else 0,
-            "person_home_ownership_RENT": 1 if home == "rent" else 0,
+            "loan_to_income": loan_to_income,
+            "credit_history_ratio": credit_history_ratio,
+            "emp_age_ratio": emp_age_ratio,
+            "interest_loan_ratio": interest_loan_ratio,
 
-            "loan_intent_EDUCATION": 1 if intent == "education" else 0,
-            "loan_intent_HOMEIMPROVEMENT": 1 if intent == "homeimprovement" else 0,
-            "loan_intent_MEDICAL": 1 if intent == "medical" else 0,
-            "loan_intent_PERSONAL": 1 if intent == "personal" else 0,
-            "loan_intent_VENTURE": 1 if intent == "venture" else 0,
+            "person_home_ownership_OTHER": home_other,
+            "person_home_ownership_OWN": home_own,
+            "person_home_ownership_RENT": home_rent,
 
-            "loan_grade_B": 1 if grade == "B" else 0,
-            "loan_grade_C": 1 if grade == "C" else 0,
-            "loan_grade_D": 1 if grade == "D" else 0,
-            "loan_grade_E": 1 if grade == "E" else 0,
-            "loan_grade_F": 1 if grade == "F" else 0,
-            "loan_grade_G": 1 if grade == "G" else 0,
+            "loan_intent_EDUCATION": intent_edu,
+            "loan_intent_HOMEIMPROVEMENT": 0,
+            "loan_intent_MEDICAL": intent_med,
+            "loan_intent_PERSONAL": intent_personal,
+            "loan_intent_VENTURE": intent_business,
 
-            "cb_person_default_on_file_Y": 1 if default == 1 else 0
+            "loan_grade_B": grade_B,
+            "loan_grade_C": grade_C,
+            "loan_grade_D": grade_D,
+            "loan_grade_E": grade_E,
+            "loan_grade_F": grade_F,
+            "loan_grade_G": grade_G,
+
+            "cb_person_default_on_file_Y": default_flag
         }
 
         df = pd.DataFrame([row])
 
+        # automatic feature order fix
+        df = df[model.feature_names_in_]
+
         prob = float(model.predict_proba(df)[0][1])
+
         prediction = 1 if prob >= 0.4 else 0
 
         risk_score = round(prob * 100, 2)
-        approval_probability = round((1 - prob) * 100, 2)
 
         decision = "Approved" if prediction == 0 else "Rejected"
 
+        # ADD THIS BLOCK TO SAVE DATA
+       # -----------------------------
         conn = get_db()
-
-        conn.execute(
-            "INSERT INTO applications(name,age,income,loan,decision,risk) VALUES (?,?,?,?,?,?)",
-            (name, age, income, loan, decision, risk_score)
-        )
-
+        conn.execute("""
+        INSERT INTO applications(name, age, income, loan, decision, risk)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+        data.get("name", "Unknown"),  # make sure frontend sends 'name'
+        age,
+        income,
+        loan,
+        decision,
+        risk_score
+))
         conn.commit()
         conn.close()
+# -----------------------------
 
         return jsonify({
             "risk_score": risk_score,
-            "approval_probability": approval_probability,
             "decision": decision
         })
 
@@ -320,10 +362,98 @@ def predict():
             "details": str(e)
         }), 500
 
+#Explanability
+@app.route("/explain", methods=["POST", "OPTIONS"])
+@limiter.limit("10 per minute", exempt_when=lambda: request.method=="OPTIONS")
+def explain():
+    if request.method == "OPTIONS":
+        return jsonify({"status":"ok"}), 200
+
+    try:
+        # get raw applicant data from frontend
+        applicant_data = request.get_json()
+
+        # call explain_decision directly with the raw data dict
+        result = explain_decision(applicant_data)
+
+        # send reasons to frontend
+        return jsonify({
+            "reasons": result.get("reasons", []),
+            "feature_importance": result.get("feature_importance", {})
+        })
+
+    except Exception as e:
+        print("Explain error:", e)
+        return jsonify({
+            "error": "Explain failed",
+            "details": str(e)
+        }), 500
+    
+# -----------------------------
+# GET ALL APPLICATIONS
+# -----------------------------
+@app.route("/applications", methods=["GET"])
+def get_applications():
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM applications").fetchall()
+    conn.close()
+
+    apps = []
+    for r in rows:
+        apps.append({
+            "name": r["name"],
+            "age": r["age"],
+            "income": r["income"],
+            "loan": r["loan"],
+            "decision": r["decision"],
+            "risk": r["risk"]
+        })
+    return jsonify(apps)
+
 
 # -----------------------------
-# RUN SERVER
+# GET ANALYTICS DATA
 # -----------------------------
-if __name__ == "__main__":
+@app.route("/analytics", methods=["GET"])
+def get_analytics():
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM applications").fetchall()
+    conn.close()
+
+    apps = []
+    for r in rows:
+        apps.append({
+            "name": r["name"],
+            "age": r["age"],
+            "income": r["income"],
+            "loan": r["loan"],
+            "decision": r["decision"],
+            "risk": r["risk"]
+        })
+    return jsonify(apps)
+
+
+# -----------------------------
+# GET AUDIT LOGS
+# -----------------------------
+@app.route("/audit", methods=["GET"])
+def get_audit_logs():
+    conn = get_db()
+    rows = conn.execute("SELECT event, details, timestamp as time FROM audit_logs ORDER BY timestamp DESC").fetchall()
+    conn.close()
+
+    logs = []
+    for r in rows:
+        logs.append({
+            "event": r["event"],
+            "details": r["details"],
+            "time": r["time"]
+        })
+    return jsonify(logs)
+
+
+if _name_ == "_main_":
+
     port = int(os.environ.get("PORT", 5000))
+
     app.run(host="0.0.0.0", port=port)

@@ -22,8 +22,8 @@ risk:number
 }
 
 const API =
-import.meta.env.VITE_API_URL ||
-"https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com/"
+  import.meta.env.VITE_API_URL ||
+  "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
 export default function RiskAnalytics(){
 
@@ -32,7 +32,7 @@ const [loading,setLoading]=useState(true)
 
 useEffect(()=>{
 
-fetch(`${API}/applications`)
+fetch(`${API}/analytics`)
 .then(res=>res.json())
 .then(data=>{
 setApps(data)

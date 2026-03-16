@@ -10,7 +10,7 @@ income:"",
 loanAmount:"",
 employmentYears:"",
 interestRate:"",
-creditHistory:"5",
+creditHistory:"",
 homeOwnership:"",
 loanIntent:"",
 loanGrade:"",
@@ -39,7 +39,7 @@ setRisk(0)
 
 try{
 
-const res=await fetch(`${API}/predict`,{
+const res=await fetch(${API}/predict,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -56,7 +56,7 @@ const data=await res.json()
 setRisk(Math.round(data.risk_score || 0))
 setDecision(data.decision || "Rejected")
 
-const exp=await fetch(`${API}/explain`,{
+const exp=await fetch(${API}/explain,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -101,6 +101,8 @@ return(
 
 <div className="p-10 space-y-10">
 
+{/* PAGE HEADER */}
+
 <div>
 
 <h1 className="text-3xl font-semibold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
@@ -116,6 +118,8 @@ Evaluate borrower profile and generate AI credit risk decision
 
 <div className="grid lg:grid-cols-2 gap-8">
 
+
+{/* FORM PANEL */}
 
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-xl shadow-xl">
 
@@ -164,7 +168,7 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purpl
 name="interestRate"
 placeholder="Interest Rate (%)"
 onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
+className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
 />
 
 <input
@@ -178,8 +182,8 @@ className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:b
 name="homeOwnership"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
-<option value="">Home Ownership</option>
+> 
+<optionvalue="">Home Ownership</option>
 <option value="rent">Rent</option>
 <option value="own">Own</option>
 <option value="mortgage">Mortgage</option>
@@ -189,8 +193,8 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 name="loanIntent"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
-<option value="">Loan Intent</option>
+> 
+<optionvalue="">Loan Intent</option>
 <option value="education">Education</option>
 <option value="medical">Medical</option>
 <option value="personal">Personal</option>
@@ -201,8 +205,8 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 name="loanGrade"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
-<option value="">Loan Grade</option>
+> 
+<optionvalue="">Loan Grade</option>
 <option value="A">A</option>
 <option value="B">B</option>
 <option value="C">C</option>
@@ -213,8 +217,8 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 name="previousDefault"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
-<option value="">Previous Default</option>
+> 
+<optionvalue="">Previous Default</option>
 <option value="0">No</option>
 <option value="1">Yes</option>
 </select>
@@ -237,6 +241,8 @@ className="mt-6 w-full p-3 rounded-lg font-semibold bg-gradient-to-r from-purple
 
 </div>
 
+
+{/* RESULT PANEL */}
 
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-xl shadow-xl">
 
@@ -272,11 +278,14 @@ ${decision==="Approved"
 
 </div>
 
-<p className={`mt-2 text-sm ${riskColor()}`}>
+<p className={mt-2 text-sm ${riskColor()}}>
 {riskLevel()}
 </p>
 
 </div>
+
+
+{/* RISK BAR */}
 
 <div className="mt-6">
 
@@ -291,13 +300,15 @@ ${decision==="Approved"
 className={`h-3 rounded-full transition-all duration-700
 ${risk < 40 ? "bg-green-400" : risk < 70 ? "bg-yellow-400" : "bg-red-500"}
 `}
-style={{width:`${risk}%`}}
+style={{width:${risk}%}}
 />
 
 </div>
 
 </div>
 
+
+{/* EXPLAINABILITY */}
 
 <div className="mt-8">
 

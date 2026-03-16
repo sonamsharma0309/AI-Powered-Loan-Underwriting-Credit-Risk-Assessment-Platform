@@ -9,7 +9,7 @@ interface Application {
   risk: number
 }
 
-const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com/"
+const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
 export default function Applications(){
 
@@ -22,8 +22,12 @@ useEffect(()=>{
 fetch(`${API}/applications`)
 .then(res=>res.json())
 .then(data=>{
-setApps(data)
-setLoading(false)
+  setApps(data)
+  setLoading(false)
+})
+.catch(err=>{
+  console.error(err)
+  setLoading(false)
 })
 
 },[])
