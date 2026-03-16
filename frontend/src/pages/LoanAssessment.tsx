@@ -39,7 +39,7 @@ setRisk(0)
 
 try{
 
-const res=await fetch(${API}/predict,{
+const res=await fetch(`${API}/predict`,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -56,7 +56,7 @@ const data=await res.json()
 setRisk(Math.round(data.risk_score || 0))
 setDecision(data.decision || "Rejected")
 
-const exp=await fetch(${API}/explain,{
+const exp=await fetch(`${API}/explain`,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -182,8 +182,8 @@ className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:b
 name="homeOwnership"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
-> 
-<optionvalue="">Home Ownership</option>
+>
+<option value="">Home Ownership</option>
 <option value="rent">Rent</option>
 <option value="own">Own</option>
 <option value="mortgage">Mortgage</option>
@@ -193,8 +193,8 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 name="loanIntent"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
-> 
-<optionvalue="">Loan Intent</option>
+>
+<option value="">Loan Intent</option>
 <option value="education">Education</option>
 <option value="medical">Medical</option>
 <option value="personal">Personal</option>
@@ -205,8 +205,8 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 name="loanGrade"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
-> 
-<optionvalue="">Loan Grade</option>
+>
+<option value="">Loan Grade</option>
 <option value="A">A</option>
 <option value="B">B</option>
 <option value="C">C</option>
@@ -217,8 +217,8 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 name="previousDefault"
 onChange={handleChange}
 className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
-> 
-<optionvalue="">Previous Default</option>
+>
+<option value="">Previous Default</option>
 <option value="0">No</option>
 <option value="1">Yes</option>
 </select>
@@ -278,7 +278,7 @@ ${decision==="Approved"
 
 </div>
 
-<p className={mt-2 text-sm ${riskColor()}}>
+<p className={`mt-2 text-sm ${riskColor()}`}>
 {riskLevel()}
 </p>
 
@@ -300,7 +300,7 @@ ${decision==="Approved"
 className={`h-3 rounded-full transition-all duration-700
 ${risk < 40 ? "bg-green-400" : risk < 70 ? "bg-yellow-400" : "bg-red-500"}
 `}
-style={{width:${risk}%}}
+style={{width:`${risk}%`}}
 />
 
 </div>
