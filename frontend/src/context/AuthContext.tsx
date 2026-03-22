@@ -9,7 +9,7 @@ import {
 interface UserType {
   name: string;
   email: string;
-  role?: string;
+  role?: "admin" | "user";
 }
 
 interface AuthContextType {
@@ -26,10 +26,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const [token, setTokenState] = useState<string | null>(null);
-
   const [user, setUserState] = useState<UserType | null>(null);
-
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  /* 🔥 ADMIN EMAIL LIST (ADD MORE IF NEEDED) */
+  const ADMIN_EMAILS = ["admin@gmail.com"];
 
   /* LOAD SAVED STATE */
 
@@ -89,25 +90,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTokenState(newToken);
   };
 
-  /* USER HANDLING */
+  /* USER HANDLING (🔥 RBAC IMPROVED) */
 
   const setUser = (newUser: UserType | null) => {
 
     if (newUser) {
-      localStorage.setItem("user", JSON.stringify(newUser));
-    } else {
-      localStorage.removeItem("user");
-    }
 
-    setUserState(newUser);
+      const email = newUser.email?.toLowerCase();
+
+      // 🔥 ROLE CHECK
+      const role: "admin" | "user" =
+        ADMIN_EMAILS.includes(email) ? "admin" : "user";
+
+      const updatedUser = { ...newUser, role };
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUserState(updatedUser);
+
+    } else {
+
+      localStorage.removeItem("user");
+      setUserState(null);
+
+    }
   };
 
   /* THEME TOGGLE */
 
   const toggleTheme = () => {
-
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-
   };
 
   return (
