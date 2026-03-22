@@ -39,7 +39,7 @@ setRisk(0)
 
 try{
 
-const res=await fetch(${API}/predict,{
+const res = await fetch(`${API}/predict`, {
 method:"POST",
 headers:{
 "Content-Type":"application/json"
