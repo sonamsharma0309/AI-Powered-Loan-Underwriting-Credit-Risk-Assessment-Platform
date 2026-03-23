@@ -63,7 +63,7 @@ const approved = apps.filter(a=>a.decision==="Approved").length
 const approvalRate = apps.length
 ? ((approved/apps.length)*100).toFixed(1)
 :0
-
+// ⚠️ Calculate average risk score
 const avgRisk = apps.length
 ? (apps.reduce((s,a)=>s+a.risk,0)/apps.length).toFixed(1)
 :0
