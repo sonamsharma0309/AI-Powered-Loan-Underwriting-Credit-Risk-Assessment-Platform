@@ -13,6 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  // 📌 Legend for chart understanding
   Legend,
 } from "recharts"
 // 📊 Application data structure for analytics charts
