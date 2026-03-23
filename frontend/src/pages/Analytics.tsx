@@ -124,6 +124,7 @@ Credit risk insights and loan performance overview
 <h2 className="mb-4 font-semibold text-lg">Loan Amounts</h2>
 
 <ResponsiveContainer width="100%" height={300}>
+  // 📊 Bar chart showing loan amounts
 <BarChart data={chartData}>
 <CartesianGrid strokeDasharray="3 3"/>
 <XAxis dataKey="name"/>
