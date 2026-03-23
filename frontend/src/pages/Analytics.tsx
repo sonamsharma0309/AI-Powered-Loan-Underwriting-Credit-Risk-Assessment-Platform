@@ -153,6 +153,7 @@ outerRadius={120}
 fill="#22c55e"
 label
 />
+
 <Tooltip/>
 // 🔄 Recharts PieChart component
 </PieChart>
@@ -161,7 +162,7 @@ label
 </div>
 
 </div>
-
+// 🎯 Risk values mapped to pie slices
 <div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
 <h2 className="mb-4 font-semibold text-lg">Risk Trend</h2>
 
