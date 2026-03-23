@@ -134,6 +134,7 @@ Credit risk insights and loan performance overview
 // 🔵 Recharts BarChart component
 <Bar dataKey="loan" fill="#6366f1"/>
 </BarChart>
+// 📦 Loan data representation in bar form
 </ResponsiveContainer>
 
 </div>
