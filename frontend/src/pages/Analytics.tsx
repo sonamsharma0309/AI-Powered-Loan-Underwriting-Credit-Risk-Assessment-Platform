@@ -1,3 +1,4 @@
+// 🔥 Analytics Page - Fetching and Visualizing Loan Data
 import { useEffect, useState } from "react"
 import {
   BarChart,
