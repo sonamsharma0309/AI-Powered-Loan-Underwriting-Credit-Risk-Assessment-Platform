@@ -80,6 +80,7 @@ return (
 <div className="p-8 space-y-8">
 
 <div>
+  // 🏷️ Page heading and description
 <h1 className="text-3xl font-bold">Advanced Analytics</h1>
 <p className="text-gray-500">
 Credit risk insights and loan performance overview
