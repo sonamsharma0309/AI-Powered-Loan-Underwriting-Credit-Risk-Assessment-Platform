@@ -103,7 +103,7 @@ Credit risk insights and loan performance overview
 <p className="text-gray-500 text-sm">Approval Rate</p>
 <h2 className="text-3xl font-bold mt-2 text-green-500">{approvalRate}%</h2>
 </div>
-
+// ⚠️ Average risk score card
 <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
 <p className="text-gray-500 text-sm">Risk Score Avg</p>
 <h2 className="text-3xl font-bold mt-2 text-red-500">{avgRisk}</h2>
