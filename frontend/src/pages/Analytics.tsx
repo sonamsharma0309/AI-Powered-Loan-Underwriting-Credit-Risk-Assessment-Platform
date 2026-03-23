@@ -131,7 +131,7 @@ Credit risk insights and loan performance overview
 <YAxis/>
 <Tooltip/>
 <Legend/>
-
+// 🔵 Recharts BarChart component
 <Bar dataKey="loan" fill="#6366f1"/>
 </BarChart>
 </ResponsiveContainer>
