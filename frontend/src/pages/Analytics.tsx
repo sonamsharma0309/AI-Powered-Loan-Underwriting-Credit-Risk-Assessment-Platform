@@ -68,7 +68,7 @@ const avgRisk = apps.length
 ? (apps.reduce((s,a)=>s+a.risk,0)/apps.length).toFixed(1)
 :0
 
-// chart data
+// 📊 Prepare data for charts
 const chartData = apps.map((a,i)=>({
 name:a.name,
 loan:a.loan,
