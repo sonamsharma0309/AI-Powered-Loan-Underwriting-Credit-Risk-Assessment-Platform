@@ -40,6 +40,7 @@ fetch(`${API}/analytics`)
 setApps(data)
 setLoading(false)
 })
+// 📡 API call to get analytics data
 .catch(err=>{
 console.error(err)
 setLoading(false)
