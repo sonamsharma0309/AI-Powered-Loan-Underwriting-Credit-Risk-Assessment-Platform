@@ -94,7 +94,7 @@ export default function LoanAssessment() {
   }
 
   return (
-
+// Main dashboard header for loan decision system
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#07122b] to-[#020617] text-white">
 
       <div className="p-10 space-y-10">
