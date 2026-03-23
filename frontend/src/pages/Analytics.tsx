@@ -143,6 +143,7 @@ Credit risk insights and loan performance overview
 <h2 className="mb-4 font-semibold text-lg">Risk Distribution</h2>
 
 <ResponsiveContainer width="100%" height={300}>
+  // 🥧 Pie chart showing risk distribution
 <PieChart>
 <Pie
 data={chartData}
