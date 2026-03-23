@@ -25,7 +25,7 @@ export default function LoanAssessment() {
   const [error, setError] = useState("")
 
   const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
-
+// Updates form state dynamically based on user input
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
