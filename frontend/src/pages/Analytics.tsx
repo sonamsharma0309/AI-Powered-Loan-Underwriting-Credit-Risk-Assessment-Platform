@@ -76,7 +76,7 @@ risk:a.risk
 }))
 // 🎨 Render analytics dashboard UI
 return (
-
+// 🧩 Main container layout for analytics page
 <div className="p-8 space-y-8">
 
 <div>
