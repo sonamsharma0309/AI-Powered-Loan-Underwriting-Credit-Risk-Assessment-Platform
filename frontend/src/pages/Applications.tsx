@@ -102,7 +102,7 @@ className="bg-[#0f172a] border border-gray-700 px-4 py-2 rounded-lg"
 <div className="bg-[#020617] rounded-xl border border-gray-800">
 
 {loading ?
-
+// ⌛ Loading state UI
 <div className="p-10 text-center text-gray-400">
 Loading AI Risk Data...
 </div>
