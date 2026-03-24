@@ -19,7 +19,7 @@ const [loading,setLoading]=useState(true)
 const [search,setSearch]=useState("")
 // 📦 Stores all applications data
 useEffect(()=>{
-
+// 🔄 Fetch applications data on mount
 fetch(`${API}/applications`)
 .then(res=>res.json())
 .then(data=>{
