@@ -14,7 +14,7 @@ export default function AuditLogs(){
 const [logs,setLogs]=useState<Log[]>([])
 // 🔄 Fetch audit logs on component mount
 useEffect(()=>{
-
+// 📡 API call to get audit logs
 fetch(`${API}/audit`)
 .then(res=>res.json())
 .then(data=>setLogs(data))
