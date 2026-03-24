@@ -65,6 +65,7 @@ Loan Applications
 </h1>
 
 <input
+// 🔎 Search input field
 placeholder="Search applicant..."
 value={search}
 onChange={(e)=>setSearch(e.target.value)}
