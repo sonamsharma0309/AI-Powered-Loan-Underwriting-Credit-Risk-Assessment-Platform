@@ -9,7 +9,7 @@ interface Application {
   decision: string
   risk: number
 }
-
+// 🌐 Backend API endpoint
 const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
 export default function Applications(){
