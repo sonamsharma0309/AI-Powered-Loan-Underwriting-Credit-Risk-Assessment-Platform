@@ -17,7 +17,7 @@ import MainLayout from "./layout/MainLayout";
 
 function App() {
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const location = useLocation();
 
   const pageAnimation = {
@@ -77,10 +77,9 @@ function App() {
         {token && (
           <Route path="/" element={<MainLayout />}>
 
-            <Route
-              index
-              element={<Navigate to="/dashboard" />}
-            />
+            <Route index element={<Navigate to="/dashboard" />} />
+
+            {/* ✅ NORMAL USER ROUTES */}
 
             <Route
               path="dashboard"
@@ -110,24 +109,6 @@ function App() {
             />
 
             <Route
-              path="analytics"
-              element={
-                <AnimatedPage>
-                  <RiskAnalytics />
-                </AnimatedPage>
-              }
-            />
-
-            <Route
-              path="audit"
-              element={
-                <AnimatedPage>
-                  <AuditLogs />
-                </AnimatedPage>
-              }
-            />
-
-            <Route
               path="profile"
               element={
                 <AnimatedPage>
@@ -145,6 +126,35 @@ function App() {
               }
             />
 
+            {/* 🔐 ADMIN ONLY ROUTES */}
+
+            <Route
+              path="analytics"
+              element={
+                user?.role === "admin" ? (
+                  <AnimatedPage>
+                    <RiskAnalytics />
+                  </AnimatedPage>
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              }
+            />
+
+            <Route
+              path="audit"
+              element={
+                user?.role === "admin" ? (
+                  <AnimatedPage>
+                    <AuditLogs />
+                  </AnimatedPage>
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              }
+            />
+
+            {/* FALLBACK */}
             <Route path="*" element={<Navigate to="/dashboard" />} />
 
           </Route>

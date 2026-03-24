@@ -25,11 +25,13 @@ export default function LoanAssessment() {
   const [error, setError] = useState("")
 
   const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
-// Updates form state dynamically based on user input
+
+  // Updates form state dynamically based on user input
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
-// Executes prediction and explanation API calls
+
+  // Executes prediction and explanation API calls
   const runAssessment = async () => {
 
     setLoading(true)
@@ -53,11 +55,11 @@ export default function LoanAssessment() {
       }
 
       const data = await res.json()
-// Determines textual risk category based on score
+
+      // Determines textual risk category based on score
       setRisk(Math.round(data.risk_score || 0))
       setDecision(data.decision || "Rejected")
 
-      // 🔥 FIXED HERE
       const exp = await fetch(`${API}/explain`, {
         method: "POST",
         headers: {
@@ -86,7 +88,8 @@ export default function LoanAssessment() {
     if (risk < 70) return "Medium Risk"
     return "High Risk"
   }
-// Returns UI color based on calculated risk level
+
+  // Returns UI color based on calculated risk level
   const riskColor = () => {
     if (risk < 40) return "text-green-400"
     if (risk < 70) return "text-yellow-400"
@@ -94,7 +97,7 @@ export default function LoanAssessment() {
   }
 
   return (
-// Main dashboard header for loan decision system
+
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#07122b] to-[#020617] text-white">
 
       <div className="p-10 space-y-10">

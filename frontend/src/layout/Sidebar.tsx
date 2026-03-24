@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 
 function Sidebar() {
-  const { setToken } = useAuth();
+
+  const { setToken, user } = useAuth(); // ✅ user added
   const [collapsed, setCollapsed] = useState(false);
 
   const logout = () => {
@@ -65,7 +66,6 @@ function Sidebar() {
       <nav className="flex flex-col gap-2 px-3 mt-2">
 
         {/* DASHBOARD */}
-
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
@@ -81,16 +81,13 @@ function Sidebar() {
               {isActive && (
                 <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
               )}
-
               <LayoutDashboard size={20} />
-
               {!collapsed && <span>Dashboard</span>}
             </>
           )}
         </NavLink>
 
         {/* ASSESSMENT */}
-
         <NavLink
           to="/assessment"
           className={({ isActive }) =>
@@ -106,16 +103,13 @@ function Sidebar() {
               {isActive && (
                 <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
               )}
-
               <Brain size={20} />
-
               {!collapsed && <span>Loan Assessment</span>}
             </>
           )}
         </NavLink>
 
         {/* APPLICATIONS */}
-
         <NavLink
           to="/applications"
           className={({ isActive }) =>
@@ -131,63 +125,59 @@ function Sidebar() {
               {isActive && (
                 <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
               )}
-
               <FileText size={20} />
-
               {!collapsed && <span>Applications</span>}
             </>
           )}
         </NavLink>
 
-        {/* ANALYTICS */}
+        {/* 🔐 ADMIN ONLY - ANALYTICS */}
+        {user?.role === "admin" && (
+          <NavLink
+            to="/analytics"
+            className={({ isActive }) =>
+              `${navItem} ${
+                isActive
+                  ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
+                  : "text-gray-400 hover:bg-white/5 hover:text-white"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
+                )}
+                <BarChart3 size={20} />
+                {!collapsed && <span>Risk Analytics</span>}
+              </>
+            )}
+          </NavLink>
+        )}
 
-        <NavLink
-          to="/analytics"
-          className={({ isActive }) =>
-            `${navItem} ${
-              isActive
-                ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
-                : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`
-          }
-        >
-          {({ isActive }) => (
-            <>
-              {isActive && (
-                <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
-              )}
-
-              <BarChart3 size={20} />
-
-              {!collapsed && <span>Risk Analytics</span>}
-            </>
-          )}
-        </NavLink>
-
-        {/* AUDIT */}
-
-        <NavLink
-          to="/audit"
-          className={({ isActive }) =>
-            `${navItem} ${
-              isActive
-                ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
-                : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`
-          }
-        >
-          {({ isActive }) => (
-            <>
-              {isActive && (
-                <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
-              )}
-
-              <ShieldCheck size={20} />
-
-              {!collapsed && <span>Audit Logs</span>}
-            </>
-          )}
-        </NavLink>
+        {/* 🔐 ADMIN ONLY - AUDIT */}
+        {user?.role === "admin" && (
+          <NavLink
+            to="/audit"
+            className={({ isActive }) =>
+              `${navItem} ${
+                isActive
+                  ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
+                  : "text-gray-400 hover:bg-white/5 hover:text-white"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
+                )}
+                <ShieldCheck size={20} />
+                {!collapsed && <span>Audit Logs</span>}
+              </>
+            )}
+          </NavLink>
+        )}
 
       </nav>
 

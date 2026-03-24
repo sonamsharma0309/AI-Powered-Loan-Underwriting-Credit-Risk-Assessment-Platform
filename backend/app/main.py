@@ -11,7 +11,7 @@ import os
 from app.model_metrics import get_model_metrics, get_fairness_metrics
 from app.explainability import explain_decision
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 CORS(
     app,
@@ -452,7 +452,7 @@ def get_audit_logs():
     return jsonify(logs)
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
 

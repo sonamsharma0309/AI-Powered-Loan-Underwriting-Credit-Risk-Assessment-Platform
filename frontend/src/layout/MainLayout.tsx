@@ -6,7 +6,7 @@ import { Sun, Moon, User, Search, Settings } from "lucide-react";
 
 function MainLayout() {
 
-  const { setToken, toggleTheme, theme } = useAuth();
+  const { setToken, toggleTheme, theme, user } = useAuth(); // ✅ user added
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
@@ -31,19 +31,15 @@ function MainLayout() {
     <div className="flex h-screen bg-gradient-to-br from-[#020617] via-[#07122b] to-[#020617] text-white">
 
       {/* SIDEBAR */}
-
       <Sidebar />
 
       {/* MAIN */}
-
       <div className="flex flex-col flex-1">
 
         {/* NAVBAR */}
-
         <header className="flex items-center justify-between px-8 py-4 border-b border-white/10 backdrop-blur-xl bg-black/30">
 
           {/* LEFT */}
-
           <div className="flex items-center gap-6">
 
             <h2 className="text-lg font-semibold tracking-wide">
@@ -51,7 +47,6 @@ function MainLayout() {
             </h2>
 
             {/* AI STATUS */}
-
             <div className="flex items-center gap-2 text-xs bg-green-500/10 text-green-400 border border-green-500/20 px-3 py-1 rounded-full">
 
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"/>
@@ -63,7 +58,6 @@ function MainLayout() {
           </div>
 
           {/* SEARCH */}
-
           <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-lg px-3 py-2 w-72 hover:border-purple-500/30 transition">
 
             <Search size={16} className="text-gray-400 mr-2"/>
@@ -76,11 +70,9 @@ function MainLayout() {
           </div>
 
           {/* RIGHT */}
-
           <div className="flex items-center gap-5">
 
             {/* THEME */}
-
             <button
               aria-label="Toggle Theme"
               onClick={toggleTheme}
@@ -90,7 +82,6 @@ function MainLayout() {
             </button>
 
             {/* PROFILE */}
-
             <div className="relative">
 
               <button
@@ -105,20 +96,31 @@ function MainLayout() {
 
                 <div className="absolute right-0 mt-3 w-56 bg-[#0b1220] border border-white/10 rounded-xl shadow-2xl p-3 backdrop-blur-xl">
 
+                  {/* ✅ USER INFO (DYNAMIC) */}
                   <div className="px-3 pb-3 border-b border-white/10">
 
                     <p className="text-sm font-semibold">
-                      CreditAI User
+                      {user?.name || "CreditAI User"}
                     </p>
 
                     <p className="text-xs text-gray-400">
-                      user@creditai.ai
+                      {user?.email || "user@creditai.ai"}
                     </p>
+
+                    {/* ✅ ROLE BADGE */}
+                    <span
+                      className={`text-[10px] px-2 py-1 rounded-full mt-2 inline-block ${
+                        user?.role === "admin"
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-blue-500/20 text-blue-400"
+                      }`}
+                    >
+                      {user?.role || "user"}
+                    </span>
 
                   </div>
 
                   {/* PROFILE */}
-
                   <button
                     onClick={goProfile}
                     className="flex items-center gap-2 w-full px-3 py-2 mt-2 rounded-lg hover:bg-white/5 transition text-sm"
@@ -128,7 +130,6 @@ function MainLayout() {
                   </button>
 
                   {/* SETTINGS */}
-
                   <button
                     onClick={goSettings}
                     className="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-white/5 transition text-sm"
@@ -138,7 +139,6 @@ function MainLayout() {
                   </button>
 
                   {/* LOGOUT */}
-
                   <button
                     onClick={logout}
                     className="w-full text-left px-3 py-2 mt-2 rounded-lg hover:bg-red-500/20 text-red-400 transition text-sm"
@@ -157,11 +157,8 @@ function MainLayout() {
         </header>
 
         {/* PAGE CONTENT */}
-
         <main className="flex-1 overflow-y-auto p-8">
-
           <Outlet />
-
         </main>
 
       </div>
