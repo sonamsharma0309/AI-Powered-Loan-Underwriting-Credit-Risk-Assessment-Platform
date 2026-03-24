@@ -88,7 +88,7 @@ className="bg-[#0f172a] border border-gray-700 px-4 py-2 rounded-lg"
 <p className="text-gray-400 text-sm">Total Loan Amount</p>
 <h2 className="text-2xl font-bold">${totalLoan.toLocaleString()}</h2>
 </div>
-
+// ⚠️ Average risk card
 <div className="bg-[#0f172a] p-6 rounded-xl">
 <p className="text-gray-400 text-sm">Average Risk</p>
 <h2 className="text-2xl font-bold">{avgRisk}%</h2>
