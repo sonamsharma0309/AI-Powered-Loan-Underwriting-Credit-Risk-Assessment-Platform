@@ -38,7 +38,7 @@ fetch(`${API}/applications`)
 const filtered=apps.filter(a=>
 a.name.toLowerCase().includes(search.toLowerCase())
 )
-
+// 💰 Calculate total loan amount
 const totalLoan=apps.reduce((s,a)=>s+a.loan,0)
 
 const avgRisk=apps.length
