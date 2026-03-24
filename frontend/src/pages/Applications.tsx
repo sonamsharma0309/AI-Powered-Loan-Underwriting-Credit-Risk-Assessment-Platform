@@ -22,6 +22,7 @@ useEffect(()=>{
 // 🔄 Fetch applications data on mount
 fetch(`${API}/applications`)
 .then(res=>res.json())
+// 📡 API call to fetch applications list
 .then(data=>{
   setApps(data)
   // ⏳ Loading indicator state
