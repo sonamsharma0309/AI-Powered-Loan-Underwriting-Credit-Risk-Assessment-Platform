@@ -95,7 +95,7 @@ className="bg-[#0f172a] border border-gray-700 px-4 py-2 rounded-lg"
 </div>
 
 </div>
-
+// 📋 Applications table
 
 {/* TABLE */}
 
