@@ -22,7 +22,7 @@ fetch(`${API}/audit`)
 .then(data=>setLogs(data))
 
 },[])
-
+// 🎨 Render audit logs UI
 return(
 
 <div className="p-8 text-white">
