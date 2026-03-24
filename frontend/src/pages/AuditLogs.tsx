@@ -48,7 +48,7 @@ Audit Logs
 </tr>
 // 🧠 Table header section
 </thead>
-
+// 🔠 Header row
 <tbody>
 
 {logs.map((log,i)=>(
