@@ -46,7 +46,7 @@ Audit Logs
 <th className="px-6 py-4 text-left">Details</th>
 // 📝 Details column
 <th className="px-6 py-4 text-left">Time</th>
-
+// ⏱️ Time column
 </tr>
 // 🧠 Table header section
 </thead>
