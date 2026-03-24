@@ -8,7 +8,7 @@ time:string
 }
 // 🌐 Backend API endpoint for audit logs
 const API="https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
-
+// 🚀 AuditLogs main component
 export default function AuditLogs(){
 
 const [logs,setLogs]=useState<Log[]>([])
