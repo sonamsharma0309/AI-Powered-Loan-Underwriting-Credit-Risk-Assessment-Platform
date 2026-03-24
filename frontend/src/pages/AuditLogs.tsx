@@ -65,7 +65,7 @@ Audit Logs
 </td>
 
 <td className="px-6 py-4 text-gray-300">
-
+// 📝 Display details
 {log.details}
 
 </td>
