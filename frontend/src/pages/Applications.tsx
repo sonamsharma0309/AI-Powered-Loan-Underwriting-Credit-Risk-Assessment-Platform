@@ -59,7 +59,7 @@ return(
 <div className="p-8 text-white">
 
 <div className="flex justify-between mb-8">
-
+// 🏷️ Page heading and search bar
 <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 text-transparent bg-clip-text">
 Loan Applications
 </h1>
