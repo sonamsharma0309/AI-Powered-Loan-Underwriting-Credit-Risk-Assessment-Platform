@@ -18,6 +18,7 @@ useEffect(()=>{
 fetch(`${API}/audit`)
 // 🔄 Convert response to JSON
 .then(res=>res.json())
+// 📥 Save logs into state
 .then(data=>setLogs(data))
 
 },[])
