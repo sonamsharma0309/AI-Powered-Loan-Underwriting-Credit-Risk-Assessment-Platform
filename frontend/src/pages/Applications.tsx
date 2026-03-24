@@ -13,11 +13,11 @@ interface Application {
 const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
 export default function Applications(){
-
+// 🚀 Main Applications Component
 const [apps,setApps]=useState<Application[]>([])
 const [loading,setLoading]=useState(true)
 const [search,setSearch]=useState("")
-
+// 📦 Stores all applications data
 useEffect(()=>{
 
 fetch(`${API}/applications`)
