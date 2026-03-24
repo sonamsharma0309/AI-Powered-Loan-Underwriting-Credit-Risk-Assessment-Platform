@@ -44,7 +44,7 @@ const totalLoan=apps.reduce((s,a)=>s+a.loan,0)
 const avgRisk=apps.length
 ? (apps.reduce((s,a)=>s+a.risk,0)/apps.length).toFixed(1)
 :0
-
+// 🎨 Assign color based on risk value
 const riskColor=(risk:number)=>{
 if(risk<40) return "bg-green-500"
 if(risk<70) return "bg-yellow-500"
