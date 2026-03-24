@@ -1,3 +1,4 @@
+// 🔥 Analytics Page - Fetching and Visualizing Loan Data
 import { useEffect, useState } from "react"
 import {
   BarChart,
@@ -8,12 +9,14 @@ import {
   Area,
   XAxis,
   YAxis,
+  // 💡 Tooltip for interactive data display
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  // 📌 Legend for chart understanding
   Legend,
 } from "recharts"
-
+// 📊 Application data structure for analytics charts
 interface Application {
   name: string
   age: number
@@ -22,29 +25,31 @@ interface Application {
   decision: string
   risk: number
 }
-
+// 🌐 Backend API base URL for analytics
 const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
-
+// 🚀 Main Analytics Component
 export default function Analytics() {
+// 📦 State for storing applications data
 
 const [apps,setApps] = useState<Application[]>([])
 const [loading,setLoading] = useState(true)
-
+// 🔄 Fetch analytics data on component mount
 useEffect(()=>{
-
+// ⏳ Loading state for API fetch
 fetch(`${API}/analytics`)
 .then(res=>res.json())
 .then(data=>{
 setApps(data)
 setLoading(false)
 })
+// 📡 API call to get analytics data
 .catch(err=>{
 console.error(err)
 setLoading(false)
 })
 
 },[])
-
+// ⌛ Loading UI while data is being fetched
 if(loading){
 return(
 <div className="p-10 text-center text-gray-400">
@@ -52,35 +57,37 @@ Loading Analytics...
 </div>
 )
 }
-
+// 💰 Calculate total loan amount
 const totalLoans = apps.reduce((s,a)=>s+a.loan,0)
-
+// ✅ Count approved applications
 const approved = apps.filter(a=>a.decision==="Approved").length
-
+// 📈 Calculate approval percentage
 const approvalRate = apps.length
 ? ((approved/apps.length)*100).toFixed(1)
 :0
-
+// ⚠️ Calculate average risk score
 const avgRisk = apps.length
 ? (apps.reduce((s,a)=>s+a.risk,0)/apps.length).toFixed(1)
 :0
 
-// chart data
+// 📊 Prepare data for charts
 const chartData = apps.map((a,i)=>({
 name:a.name,
 loan:a.loan,
 risk:a.risk
 }))
-
+// 🎨 Render analytics dashboard UI
 return (
-
+// 🧩 Main container layout for analytics page
 <div className="p-8 space-y-8">
 
 <div>
+  // 🏷️ Page heading and description
 <h1 className="text-3xl font-bold">Advanced Analytics</h1>
 <p className="text-gray-500">
 Credit risk insights and loan performance overview
 </p>
+// 📊 KPI cards section displaying key metrics
 </div>
 
 {/* KPI CARDS */}
@@ -89,24 +96,26 @@ Credit risk insights and loan performance overview
 
 <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
 <p className="text-gray-500 text-sm">Total Loans</p>
+// 💵 Total loan amount card
 <h2 className="text-3xl font-bold mt-2">${totalLoans.toLocaleString()}</h2>
 </div>
 
 <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
+  // ✅ Approval rate card
 <p className="text-gray-500 text-sm">Approval Rate</p>
 <h2 className="text-3xl font-bold mt-2 text-green-500">{approvalRate}%</h2>
 </div>
-
+// ⚠️ Average risk score card
 <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
 <p className="text-gray-500 text-sm">Risk Score Avg</p>
 <h2 className="text-3xl font-bold mt-2 text-red-500">{avgRisk}</h2>
 </div>
-
+// 📦 Total applications count card
 <div className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6">
 <p className="text-gray-500 text-sm">Applications</p>
 <h2 className="text-3xl font-bold mt-2">{apps.length}</h2>
 </div>
-
+// 📈 Charts section for visual insights
 </div>
 
 {/* CHARTS */}
@@ -117,15 +126,17 @@ Credit risk insights and loan performance overview
 <h2 className="mb-4 font-semibold text-lg">Loan Amounts</h2>
 
 <ResponsiveContainer width="100%" height={300}>
+  // 📊 Bar chart showing loan amounts
 <BarChart data={chartData}>
 <CartesianGrid strokeDasharray="3 3"/>
 <XAxis dataKey="name"/>
 <YAxis/>
 <Tooltip/>
 <Legend/>
-
+// 🔵 Recharts BarChart component
 <Bar dataKey="loan" fill="#6366f1"/>
 </BarChart>
+// 📦 Loan data representation in bar form
 </ResponsiveContainer>
 
 </div>
@@ -134,6 +145,7 @@ Credit risk insights and loan performance overview
 <h2 className="mb-4 font-semibold text-lg">Risk Distribution</h2>
 
 <ResponsiveContainer width="100%" height={300}>
+  // 🥧 Pie chart showing risk distribution
 <PieChart>
 <Pie
 data={chartData}
@@ -143,36 +155,39 @@ outerRadius={120}
 fill="#22c55e"
 label
 />
+
 <Tooltip/>
+// 🔄 Recharts PieChart component
 </PieChart>
 </ResponsiveContainer>
 
 </div>
 
 </div>
-
+// 🎯 Risk values mapped to pie slices
 <div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-6">
 <h2 className="mb-4 font-semibold text-lg">Risk Trend</h2>
 
 <ResponsiveContainer width="100%" height={320}>
+  // 📊 Recharts AreaChart component
 <AreaChart data={chartData}>
 <CartesianGrid strokeDasharray="3 3"/>
 <XAxis dataKey="name"/>
 <YAxis/>
 <Tooltip/>
-
+// 📉 Area chart showing risk trend over applications
 <Area
 type="monotone"
 dataKey="risk"
 stroke="#ef4444"
 fill="#fecaca"
 />
-
+// 🔥 Risk trend visualization line
 </AreaChart>
 </ResponsiveContainer>
 
 </div>
-
+// ✅ End of analytics layout
 </div>
 
 )
