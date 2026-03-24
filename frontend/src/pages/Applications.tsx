@@ -74,7 +74,7 @@ className="bg-[#0f172a] border border-gray-700 px-4 py-2 rounded-lg"
 
 </div>
 
-
+// 📊 Stats cards section
 {/* STATS */}
 
 <div className="grid grid-cols-3 gap-6 mb-8">
