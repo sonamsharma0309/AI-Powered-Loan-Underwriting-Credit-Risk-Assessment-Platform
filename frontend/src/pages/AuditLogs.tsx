@@ -52,7 +52,7 @@ Audit Logs
 </thead>
 // 🔠 Header row
 <tbody>
-
+// 🔽 Table body section
 {logs.map((log,i)=>(
 
 <tr key={i} className="border-t border-gray-800">
