@@ -62,6 +62,7 @@ function Dashboard() {
 // AI engine status indicator container
           <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            // AI engine active text display
             <span className="text-sm text-gray-300">
               AI Engine Active
             </span>
