@@ -12,7 +12,7 @@ function Dashboard() {
     rejected_loans: 0,
     average_risk: 0
   })
-
+// Effect hook to fetch analytics data on load
   useEffect(() => {
 
     fetch(`${API}/analytics`)
