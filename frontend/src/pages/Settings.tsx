@@ -107,9 +107,9 @@ Save Settings
 </button>
 
 </div>
-
-{/* VERSION */}
 // Divider line before save section
+{/* VERSION */}
+// Version section container
 <div className="text-sm text-gray-500 pt-4 border-t border-white/10">
 CreditAI Platform v1.0
 </div>
