@@ -47,6 +47,7 @@ function Dashboard() {
       <div className="p-10 space-y-10">
 // Header section for dashboard title and status
         {/* HEADER */}
+        // Header layout using flexbox
         <div className="flex items-center justify-between">
 
           <div>
