@@ -19,7 +19,7 @@ function Dashboard() {
     // Convert response to JSON
       .then(res => res.json())
       // Handle API response data
-      .then(data => {
+      .then(data => { // Debug log for API response
         console.log("API DATA:", data)
 
         // 🔥 SAFE HANDLING
