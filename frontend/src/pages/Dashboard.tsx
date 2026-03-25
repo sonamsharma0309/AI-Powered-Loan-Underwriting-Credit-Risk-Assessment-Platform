@@ -23,6 +23,7 @@ function Dashboard() {
         console.log("API DATA:", data)
 
         // 🔥 SAFE HANDLING
+        // Safe fallback handling for API data
         const safeData = data?.data || data || {}
 
         setStats({
