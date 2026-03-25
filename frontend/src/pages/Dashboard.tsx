@@ -95,7 +95,7 @@ function Dashboard() {
               {stats.rejected_loans}
             </h2>
           </div>
-
+// Average risk percentage card UI
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
             <p className="text-gray-400 text-sm">Average Risk</p>
             <h2 className="text-3xl font-semibold mt-2 text-yellow-400">
