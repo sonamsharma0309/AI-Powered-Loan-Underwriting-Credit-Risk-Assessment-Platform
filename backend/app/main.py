@@ -8,25 +8,24 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+BASE_DIR = os.path.dirname(__file__)
+MODELS_DIR = os.path.join(BASE_DIR, "./models")
 
-model = joblib.load(os.path.join(os.path.dirname(__file__), "../models/risk_model_optimized.pkl"))
+# -------- LOAD MODEL --------
+model = joblib.load(os.path.join(MODELS_DIR, "risk_model_optimized.pkl"))
+model_columns = joblib.load(os.path.join(MODELS_DIR, "model_columns.pkl"))
 
 
+# -------- DB --------
 def get_db():
     conn = sqlite3.connect("creditai.db")
     conn.row_factory = sqlite3.Row
     return conn
 
 
-# -----------------------------
-# DATABASE INIT
-# -----------------------------
-
 def init_db():
-
     conn = get_db()
 
-    # APPLICATION TABLE
     conn.execute("""
     CREATE TABLE IF NOT EXISTS applications(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,257 +38,284 @@ def init_db():
     )
     """)
 
-    # USERS TABLE
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE,
-        password TEXT
-    )
-    """)
-
     conn.commit()
     conn.close()
+
+
+def safe_float(v):
+    try:
+        return float(v)
+    except:
+        return 0.0
 
 
 init_db()
 
 
+# -------- ROOT --------
 @app.route("/")
 def home():
-    return jsonify({"message": "CreditAI Backend Running"})
+    return jsonify({"message": "Backend Running 🚀"})
 
 
-# -----------------------------
-# REGISTER
-# -----------------------------
-
-@app.route("/register", methods=["POST"])
-def register():
-
-    data = request.json
-
-    email = data["email"]
-    password = data["password"]
-
-    conn = get_db()
-
-    user = conn.execute(
-        "SELECT * FROM users WHERE email=?",
-        (email,)
-    ).fetchone()
-
-    if user:
-        conn.close()
-        return jsonify({"success":False,"message":"User already exists"})
-
-    conn.execute(
-        "INSERT INTO users(email,password) VALUES (?,?)",
-        (email,password)
-    )
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({"success":True})
-
-
-# -----------------------------
-# LOGIN
-# -----------------------------
-
-@app.route("/login", methods=["POST"])
-def login():
-
-    data = request.json
-
-    email = data["email"]
-    password = data["password"]
-
-    conn = get_db()
-
-    user = conn.execute(
-        "SELECT * FROM users WHERE email=? AND password=?",
-        (email,password)
-    ).fetchone()
-
-    conn.close()
-
-    if user:
-        return jsonify({
-            "success":True,
-            "token":"creditai-user"
-        })
-
-    return jsonify({
-        "success":False,
-        "message":"Invalid credentials"
-    })
-
-
-# -----------------------------
-# LOAN PREDICTION
-# -----------------------------
-
+# -------- PREDICT --------
 @app.route("/predict", methods=["POST"])
 def predict():
+    try:
+        data = request.get_json() or {}
 
-    data = request.json
+        # -------- INPUT --------
+        name = str(data.get("name", "")).strip()
+        age = safe_float(data.get("age"))
+        income = safe_float(data.get("income"))
+        loan = safe_float(data.get("loanAmount"))
+        emp = safe_float(data.get("employmentYears"))
+        rate = safe_float(data.get("interestRate"))
+        credit = safe_float(data.get("creditHistory"))
 
-    name = data["name"]
-    age = float(data["age"])
-    income = float(data["income"])
-    loan = float(data["loanAmount"])
-    credit = float(data["creditHistory"])
+        home = str(data.get("homeOwnership", "")).strip().lower()
+        intent = str(data.get("loanIntent", "")).strip().lower()
+        grade = str(data.get("loanGrade", "")).strip().upper()
+        default = str(data.get("previousDefault", "0")).strip()
 
-    loan_percent_income = loan / income
-    loan_to_income_ratio = loan / income
-    interest_income_ratio = credit / income
+        # -------- VALIDATION --------
+        if not name:
+            return jsonify({"error": "Name required"}), 400
 
-    row = {
-        "person_age": age,
-        "person_income": income,
-        "person_emp_length": 5,
-        "loan_amnt": loan,
-        "loan_int_rate": credit,
-        "loan_percent_income": loan_percent_income,
-        "cb_person_cred_hist_length": 5,
-        "loan_to_income_ratio": loan_to_income_ratio,
-        "interest_income_ratio": interest_income_ratio,
+        if age <= 0:
+            return jsonify({"error": "Invalid age"}), 400
 
-        "person_home_ownership_OTHER":0,
-        "person_home_ownership_OWN":0,
-        "person_home_ownership_RENT":1,
+        if income <= 0 or loan <= 0:
+            return jsonify({"error": "Invalid income/loan"}), 400
 
-        "loan_intent_EDUCATION":0,
-        "loan_intent_HOMEIMPROVEMENT":0,
-        "loan_intent_MEDICAL":0,
-        "loan_intent_PERSONAL":1,
-        "loan_intent_VENTURE":0,
+        if emp < 0 or rate < 0 or credit < 0:
+            return jsonify({"error": "Employment, interest rate, and credit history cannot be negative"}), 400
 
-        "loan_grade_B":0,
-        "loan_grade_C":0,
-        "loan_grade_D":0,
-        "loan_grade_E":0,
-        "loan_grade_F":0,
-        "loan_grade_G":0,
+        # -------- FEATURES --------
+        ratio = loan / income if income > 0 else 0
+        interest_ratio = rate / income if income > 0 else 0
+        credit_ratio = credit / age if age > 0 else 0
+        emp_ratio = emp / age if age > 0 else 0
 
-        "cb_person_default_on_file_Y":0
-    }
+        row = {
+            "person_age": age,
+            "person_income": income,
+            "person_emp_length": emp,
+            "loan_amnt": loan,
+            "loan_int_rate": rate,
+            "loan_percent_income": ratio,
+            "cb_person_cred_hist_length": credit,
 
-    df = pd.DataFrame([row])
+            "loan_to_income_ratio": ratio,
+            "interest_income_ratio": interest_ratio,
+            "credit_history_ratio": credit_ratio,
+            "emp_age_ratio": emp_ratio,
 
-    prediction = int(model.predict(df)[0])
-    prob = float(model.predict_proba(df)[0][1])
+            # FLAGS
+            "high_loan_ratio_flag": 1 if ratio > 0.5 else 0,
+            "short_credit_history_flag": 1 if credit < 2 else 0,
+            "high_interest_flag": 1 if rate > 18 else 0,
+            "young_and_low_history_flag": 1 if (age < 25 and credit < 3) else 0,
 
-    risk_score = round(prob * 100,2)
-    approval_probability = round((1-prob)*100,2)
+            # HOME
+            "person_home_ownership_RENT": 1 if home == "rent" else 0,
+            "person_home_ownership_OWN": 1 if home == "own" else 0,
+            "person_home_ownership_MORTGAGE": 1 if home == "mortgage" else 0,
+            "person_home_ownership_OTHER": 1 if home == "other" else 0,
 
-    decision = "Approved" if prediction == 0 else "Rejected"
+            # INTENT
+            "loan_intent_PERSONAL": 1 if intent == "personal" else 0,
+            "loan_intent_EDUCATION": 1 if intent == "education" else 0,
+            "loan_intent_MEDICAL": 1 if intent == "medical" else 0,
+            "loan_intent_VENTURE": 1 if intent == "venture" else 0,
+            "loan_intent_HOMEIMPROVEMENT": 1 if intent == "homeimprovement" else 0,
+            "loan_intent_DEBTCONSOLIDATION": 1 if intent == "debtconsolidation" else 0,
 
-    conn = get_db()
+            # GRADE
+            "loan_grade_A": 1 if grade == "A" else 0,
+            "loan_grade_B": 1 if grade == "B" else 0,
+            "loan_grade_C": 1 if grade == "C" else 0,
+            "loan_grade_D": 1 if grade == "D" else 0,
+            "loan_grade_E": 1 if grade == "E" else 0,
+            "loan_grade_F": 1 if grade == "F" else 0,
+            "loan_grade_G": 1 if grade == "G" else 0,
 
-    conn.execute(
-        "INSERT INTO applications(name,age,income,loan,decision,risk) VALUES (?,?,?,?,?,?)",
-        (name,age,income,loan,decision,risk_score)
-    )
+            # DEFAULT
+            "cb_person_default_on_file_N": 1 if default == "0" else 0,
+            "cb_person_default_on_file_Y": 1 if default == "1" else 0,
+        }
 
-    conn.commit()
-    conn.close()
+        df = pd.DataFrame([row])
+        df = df.reindex(columns=model_columns, fill_value=0)
 
-    return jsonify({
-        "risk_score":risk_score,
-        "approval_probability":approval_probability,
-        "decision":decision
-    })
+        # -------- MODEL --------
+        prob = float(model.predict_proba(df)[0][1])
+        risk = round(prob * 100, 2)
 
+        THRESHOLD = 0.30
 
-# -----------------------------
-# APPLICATION LIST
-# -----------------------------
+        decision = "Approved"
+        reason = None
 
-@app.route("/applications")
-def applications():
+        # -------- RULE OVERRIDE --------
+        if default == "1":
+            decision = "Rejected"
+            reason = "Previous default"
+        elif ratio > 0.5:
+            decision = "Rejected"
+            reason = "High loan/income ratio"
+        elif credit < 2:
+            decision = "Rejected"
+            reason = "Low credit history"
+        elif rate > 18:
+            decision = "Rejected"
+            reason = "High interest rate"
+        elif grade in ["E", "F", "G"]:
+            decision = "Rejected"
+            reason = "Risky loan grade"
+        else:
+            decision = "Rejected" if prob >= THRESHOLD else "Approved"
 
-    conn = get_db()
+        # -------- SAVE --------
+        conn = get_db()
+        conn.execute(
+            "INSERT INTO applications(name, age, income, loan, decision, risk) VALUES (?, ?, ?, ?, ?, ?)",
+            (name, age, income, loan, decision, risk)
+        )
+        conn.commit()
+        conn.close()
 
-    rows = conn.execute(
-        "SELECT * FROM applications ORDER BY id DESC"
-    ).fetchall()
+        return jsonify({
+            "risk_score": risk,
+            "decision": decision,
+            "override_reason": reason,
+            "approval_probability": round((1 - prob) * 100, 2)
+        })
 
-    conn.close()
-
-    return jsonify([dict(row) for row in rows])
-
-
-# -----------------------------
-# ANALYTICS
-# -----------------------------
-
-@app.route("/analytics")
-def analytics():
-
-    conn = get_db()
-
-    total = conn.execute(
-        "SELECT COUNT(*) as c FROM applications"
-    ).fetchone()["c"]
-
-    approved = conn.execute(
-        "SELECT COUNT(*) as c FROM applications WHERE decision='Approved'"
-    ).fetchone()["c"]
-
-    rejected = conn.execute(
-        "SELECT COUNT(*) as c FROM applications WHERE decision='Rejected'"
-    ).fetchone()["c"]
-
-    avg_risk = conn.execute(
-        "SELECT AVG(risk) as r FROM applications"
-    ).fetchone()["r"]
-
-    conn.close()
-
-    return jsonify({
-        "total":total,
-        "approved":approved,
-        "rejected":rejected,
-        "avg_risk":avg_risk or 0
-    })
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 
-# -----------------------------
-# AI EXPLANATION
-# -----------------------------
-
+# -------- EXPLAIN --------
 @app.route("/explain", methods=["POST"])
 def explain():
+    try:
+        data = request.get_json() or {}
 
-    data = request.json
+        income = safe_float(data.get("income"))
+        loan = safe_float(data.get("loanAmount"))
+        credit = safe_float(data.get("creditHistory"))
+        emp = safe_float(data.get("employmentYears"))
+        rate = safe_float(data.get("interestRate"))
+        default = str(data.get("previousDefault", "0")).strip()
+        grade = str(data.get("loanGrade", "")).strip().upper()
+        home = str(data.get("homeOwnership", "")).strip().lower()
 
-    income = float(data["income"])
-    loan = float(data["loanAmount"])
-    credit = float(data["creditHistory"])
+        reasons = []
 
-    reasons = []
+        if income > 0 and loan / income > 0.5:
+            reasons.append("Loan amount is high compared to income")
 
-    if loan/income > 0.5:
-        reasons.append("Loan amount too high compared to income")
+        if credit < 2:
+            reasons.append("Credit history is very short")
 
-    if credit < 10:
-        reasons.append("Short credit history")
+        if emp < 2:
+            reasons.append("Employment history is limited")
 
-    if loan > income*0.4:
-        reasons.append("High loan to income ratio")
+        if rate > 18:
+            reasons.append("Interest rate is very high")
 
-    if len(reasons)==0:
-        reasons.append("Applicant profile looks safe")
+        if default == "1":
+            reasons.append("Previous default history increases risk")
 
-    return jsonify({"reasons":reasons})
+        if grade in ["E", "F", "G"]:
+            reasons.append("Loan grade indicates higher lending risk")
+
+        if home == "rent":
+            reasons.append("Rental status may indicate lower asset backing")
+
+        if not reasons:
+            reasons.append("Applicant profile looks stable and balanced")
+
+        return jsonify({"reasons": reasons})
+
+    except Exception as e:
+        print("Explain error:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 
-# -----------------------------
+# -------- ANALYTICS --------
+@app.route("/analytics")
+def analytics():
+    try:
+        conn = get_db()
 
+        total = conn.execute(
+            "SELECT COUNT(*) as c FROM applications"
+        ).fetchone()["c"]
+
+        approved = conn.execute(
+            "SELECT COUNT(*) as c FROM applications WHERE decision='Approved'"
+        ).fetchone()["c"]
+
+        rejected = conn.execute(
+            "SELECT COUNT(*) as c FROM applications WHERE decision='Rejected'"
+        ).fetchone()["c"]
+
+        avg_risk = conn.execute(
+            "SELECT AVG(risk) as r FROM applications"
+        ).fetchone()["r"]
+
+        total_loan = conn.execute(
+            "SELECT SUM(loan) as s FROM applications"
+        ).fetchone()["s"]
+
+        conn.close()
+
+        return jsonify({
+            "total": total,
+            "approved": approved,
+            "rejected": rejected,
+            "avg_risk": avg_risk or 0,
+            "total_loan": total_loan or 0
+        })
+    except Exception as e:
+        print("Analytics error:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+
+# -------- APPLICATIONS --------
+@app.route("/applications")
+def get_applications():
+    try:
+        conn = get_db()
+
+        rows = conn.execute("""
+            SELECT * FROM applications
+            ORDER BY id DESC
+        """).fetchall()
+
+        data = []
+        for r in rows:
+            data.append({
+                "name": r["name"],
+                "age": r["age"],
+                "income": r["income"],
+                "loan": r["loan"],
+                "decision": r["decision"],
+                "risk": r["risk"]
+            })
+
+        conn.close()
+        return jsonify(data)
+
+    except Exception as e:
+        print("Applications error:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+
+# -------- RUN --------
 if __name__ == "__main__":
-    app.run(debug=True)
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
