@@ -30,7 +30,7 @@ Settings
 {/* THEME */}
 // Theme toggle row layout
 <div className="flex items-center justify-between">
-
+// Theme description text block
 <div>
 <p className="font-semibold">Theme</p>
 <p className="text-sm text-gray-400">
