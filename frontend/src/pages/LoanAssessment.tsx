@@ -1,4 +1,3 @@
-// Handles AI-based loan risk assessment and prediction
 import { useState } from "react"
 import RiskGauge from "../components/RiskGauge"
 
@@ -26,12 +25,10 @@ export default function LoanAssessment() {
 
   const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
-  // Updates form state dynamically based on user input
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  // Executes prediction and explanation API calls
   const runAssessment = async () => {
 
     setLoading(true)
@@ -56,10 +53,10 @@ export default function LoanAssessment() {
 
       const data = await res.json()
 
-      // Determines textual risk category based on score
       setRisk(Math.round(data.risk_score || 0))
       setDecision(data.decision || "Rejected")
 
+      // 🔥 FIXED HERE
       const exp = await fetch(`${API}/explain`, {
         method: "POST",
         headers: {
@@ -89,7 +86,6 @@ export default function LoanAssessment() {
     return "High Risk"
   }
 
-  // Returns UI color based on calculated risk level
   const riskColor = () => {
     if (risk < 40) return "text-green-400"
     if (risk < 70) return "text-yellow-400"
@@ -148,7 +144,7 @@ export default function LoanAssessment() {
               onClick={runAssessment}
               className="mt-6 w-full p-3 bg-purple-600 rounded-lg"
             >
-              {loading ? "Running..." : "Run AI Risk Assessment"}
+              {loading ? "Running..." : "Run AI Assessment"}
             </button>
 
             {error && <p className="text-red-400 mt-4">{error}</p>}
