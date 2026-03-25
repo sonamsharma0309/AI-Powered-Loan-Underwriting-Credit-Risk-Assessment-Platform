@@ -47,7 +47,7 @@ Toggle Theme
 </button>
 
 </div>
-
+// System notifications section container
 {/* SYSTEM NOTIFICATIONS */}
 
 <div className="flex items-center justify-between">
