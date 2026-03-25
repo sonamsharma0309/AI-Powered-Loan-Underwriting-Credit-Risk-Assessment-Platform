@@ -1,0 +1,16 @@
+MODEL PERFORMANCE
+Accuracy: 0.8406315789473684
+ROC AUC: 0.945090244229737
+Precision (Risky class): 0.5861846352485475
+Recall (Risky class): 0.88671875
+F1 Score (Risky class): 0.7057909055577147
+Threshold used: 0.3
+
+Confusion Matrix:
+[[3085  641]
+ [ 116  908]]
+
+TN: 3085
+FP: 641
+FN: 116
+TP: 908
