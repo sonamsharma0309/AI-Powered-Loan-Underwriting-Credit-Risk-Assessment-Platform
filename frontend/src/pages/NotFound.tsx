@@ -8,7 +8,8 @@ const NotFound = () => {
   useEffect(() => {
     // Log error message for debugging unknown routes
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+  },// Dependency array to track route changes
+   [location.pathname]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
