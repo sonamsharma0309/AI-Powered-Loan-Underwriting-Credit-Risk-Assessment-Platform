@@ -93,7 +93,7 @@ emailAlerts ? "bg-green-600" : "bg-white/10"
 </button>
 
 </div>
-
+// Save settings section container
 {/* SAVE */}
 
 <div className="pt-6 border-t border-white/10">
