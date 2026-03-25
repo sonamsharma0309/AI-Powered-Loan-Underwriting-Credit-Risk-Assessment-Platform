@@ -72,7 +72,7 @@ notifications ? "bg-green-600" : "bg-white/10"
 </div>
 // Email alerts section container
 {/* EMAIL ALERTS */}
-
+// Email alerts row layout
 <div className="flex items-center justify-between">
 
 <div>
