@@ -105,6 +105,7 @@ function Dashboard() {
               // Card value highlight styling
               // Percentage calculation for risk
             </h2>
+            // Format risk value to 2 decimal places
           </div>
 
         </div>
