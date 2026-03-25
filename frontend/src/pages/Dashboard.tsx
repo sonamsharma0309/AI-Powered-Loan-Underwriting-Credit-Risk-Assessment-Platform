@@ -75,6 +75,7 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
+          // Total applications card UI
             <p className="text-gray-400 text-sm">Total Applications</p>
             <h2 className="text-3xl font-semibold mt-2 text-purple-400">
               {stats.total_applications}
