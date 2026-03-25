@@ -3,7 +3,7 @@ import { Moon, Sun, Bell, Mail, Save } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 // Settings page component for user preferences
 function Settings(){
-
+// Get theme and toggle function from AuthContext
 const { theme, toggleTheme } = useAuth()
 
 const [notifications,setNotifications]=useState(true)
