@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext"
 function Settings(){
 // Get theme and toggle function from AuthContext
 const { theme, toggleTheme } = useAuth()
-
+// State for system notifications toggle
 const [notifications,setNotifications]=useState(true)
 const [emailAlerts,setEmailAlerts]=useState(true)
 
