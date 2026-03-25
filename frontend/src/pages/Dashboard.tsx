@@ -88,7 +88,7 @@ function Dashboard() {
               {stats.approved_loans}
             </h2>
           </div>
-
+// Rejected loans card UI
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
             <p className="text-gray-400 text-sm">Rejected Loans</p>
             <h2 className="text-3xl font-semibold mt-2 text-red-400">
