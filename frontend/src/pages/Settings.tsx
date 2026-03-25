@@ -109,7 +109,7 @@ Save Settings
 </div>
 
 {/* VERSION */}
-
+// Divider line before save section
 <div className="text-sm text-gray-500 pt-4 border-t border-white/10">
 CreditAI Platform v1.0
 </div>
