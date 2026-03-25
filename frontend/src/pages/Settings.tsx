@@ -18,7 +18,7 @@ return(
 // Root container for settings page
 // App container wrapper for settings layout
 <div className="min-h-screen text-white">
-
+// Max width container for centered layout
 <div className="max-w-4xl">
 
 <h1 className="text-3xl font-semibold mb-8">
