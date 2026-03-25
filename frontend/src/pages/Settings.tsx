@@ -98,7 +98,7 @@ emailAlerts ? "bg-green-600" : "bg-white/10"
 
 <div className="pt-6 border-t border-white/10">
 // Save button UI styling
-<button
+<button // Save settings click handler binding
 onClick={saveSettings}
 className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-lg"
 >
