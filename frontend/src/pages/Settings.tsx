@@ -26,7 +26,7 @@ Settings
 </h1>
 // Settings card main container
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-8 space-y-8">
-
+// Theme settings section container
 {/* THEME */}
 
 <div className="flex items-center justify-between">
