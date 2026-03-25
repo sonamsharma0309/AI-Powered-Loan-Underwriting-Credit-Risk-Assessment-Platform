@@ -12,6 +12,7 @@ const NotFound = () => {
    [location.pathname]);
 
   return (
+    // Root container for 404 page layout
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold">404</h1>
