@@ -111,6 +111,7 @@ Save Settings
 {/* VERSION */}
 // Version section container
 <div className="text-sm text-gray-500 pt-4 border-t border-white/10">
+// Version text display for platform
 CreditAI Platform v1.0
 </div>
 
