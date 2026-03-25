@@ -49,7 +49,7 @@ function Dashboard() {
         {/* HEADER */}
         // Header layout using flexbox
         <div className="flex items-center justify-between">
-
+// Dashboard title text styling
           <div>
             <h1 className="text-3xl font-semibold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
               AI Credit Risk Dashboard
