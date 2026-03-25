@@ -100,6 +100,7 @@ function Dashboard() {
             <p className="text-gray-400 text-sm">Average Risk</p>
             // Card container styling with backdrop blur
             <h2 className="text-3xl font-semibold mt-2 text-yellow-400">
+              // Card title text styling
               {(stats.average_risk * 100).toFixed(2)}%
             </h2>
           </div>
