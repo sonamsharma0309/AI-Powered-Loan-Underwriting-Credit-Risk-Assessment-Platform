@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+// API base URL configuration
 const API =
   import.meta.env.VITE_API_URL ||
   "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
