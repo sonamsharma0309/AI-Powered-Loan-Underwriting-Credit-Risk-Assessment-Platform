@@ -114,7 +114,7 @@ Save Settings
 // Version text display for platform
 CreditAI Platform v1.0
 </div>
-
+// Footer spacing and layout
 </div>
 
 </div>
