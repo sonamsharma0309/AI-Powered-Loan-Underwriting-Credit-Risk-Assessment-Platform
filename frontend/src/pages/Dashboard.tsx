@@ -71,6 +71,7 @@ function Dashboard() {
         </div>
 // Live status indicator dot animation
         {/* STATS */}
+        // Stats grid layout container
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
