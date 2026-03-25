@@ -58,7 +58,7 @@ Toggle Theme
 AI alerts and system activity updates
 </p>
 </div>
-
+// Notifications toggle button
 <button
 onClick={()=>setNotifications(!notifications)}
 className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
