@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-
+// NotFound component for handling invalid routes
 const NotFound = () => {
   const location = useLocation();
 
