@@ -49,7 +49,7 @@ Toggle Theme
 </div>
 // System notifications section container
 {/* SYSTEM NOTIFICATIONS */}
-
+// Notifications row layout
 <div className="flex items-center justify-between">
 
 <div>
