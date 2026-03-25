@@ -33,6 +33,7 @@ function Dashboard() {
           average_risk: safeData.average_risk || 0
         })
       })
+      // Handle API errors gracefully
       .catch(err => {
         console.error("Analytics fetch error:", err)
       })
