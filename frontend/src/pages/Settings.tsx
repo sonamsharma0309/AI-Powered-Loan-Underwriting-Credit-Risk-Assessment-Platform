@@ -20,7 +20,7 @@ return(
 <div className="min-h-screen text-white">
 // Max width container for centered layout
 <div className="max-w-4xl">
-
+// Page heading title
 <h1 className="text-3xl font-semibold mb-8">
 Settings
 </h1>
