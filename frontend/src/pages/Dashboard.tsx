@@ -16,6 +16,7 @@ function Dashboard() {
   useEffect(() => {
 // Fetch analytics data from backend API
     fetch(`${API}/analytics`)
+    // Convert response to JSON
       .then(res => res.json())
       .then(data => {
         console.log("API DATA:", data)
