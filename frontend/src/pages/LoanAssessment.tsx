@@ -19,10 +19,13 @@ export default function LoanAssessment() {
   const [risk, setRisk] = useState(0)
   const [decision, setDecision] = useState("")
   const [explanation, setExplanation] = useState<string[]>([])
+  const [overrideReason, setOverrideReason] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const API = "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
+  const API =
+    import.meta.env.VITE_API_URL ||
+    "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -31,10 +34,28 @@ export default function LoanAssessment() {
   }
 
   const runAssessment = async () => {
+    if (
+      !form.name ||
+      !form.age ||
+      !form.income ||
+      !form.loanAmount ||
+      !form.employmentYears ||
+      !form.interestRate ||
+      !form.creditHistory ||
+      !form.homeOwnership ||
+      !form.loanIntent ||
+      !form.loanGrade ||
+      !form.previousDefault
+    ) {
+      setError("Please fill all fields.")
+      return
+    }
+
     setLoading(true)
     setError("")
     setExplanation([])
     setDecision("")
+    setOverrideReason("")
     setRisk(0)
 
     try {
@@ -42,14 +63,14 @@ export default function LoanAssessment() {
         name: form.name,
         age: Number(form.age),
         income: Number(form.income),
-        loan_amount: Number(form.loanAmount),
-        employment_years: Number(form.employmentYears),
-        interest_rate: Number(form.interestRate),
-        credit_history: Number(form.creditHistory),
-        home_ownership: form.homeOwnership,
-        loan_intent: form.loanIntent,
-        loan_grade: form.loanGrade,
-        previous_default: Number(form.previousDefault),
+        loanAmount: Number(form.loanAmount),
+        employmentYears: Number(form.employmentYears),
+        interestRate: Number(form.interestRate),
+        creditHistory: Number(form.creditHistory),
+        homeOwnership: form.homeOwnership,
+        loanIntent: form.loanIntent,
+        loanGrade: form.loanGrade,
+        previousDefault: form.previousDefault,
       }
 
       const res = await fetch(`${API}/predict`, {
@@ -60,14 +81,15 @@ export default function LoanAssessment() {
         body: JSON.stringify(payload),
       })
 
-      if (!res.ok) {
-        throw new Error("Prediction failed")
-      }
-
       const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Prediction failed")
+      }
 
       setRisk(Math.round(data.risk_score || 0))
       setDecision(data.decision || "Rejected")
+      setOverrideReason(data.override_reason || "")
 
       const exp = await fetch(`${API}/explain`, {
         method: "POST",
@@ -79,11 +101,11 @@ export default function LoanAssessment() {
 
       if (exp.ok) {
         const expData = await exp.json()
-        setExplanation(expData.explanations || expData.reasons || [])
+        setExplanation(expData.reasons || [])
       }
-    } catch (err) {
-      console.error(err)
-      setError("Something went wrong while assessing the loan.")
+    } catch (err: any) {
+      console.error("Assessment error:", err)
+      setError(err.message || "Something went wrong while assessing the loan.")
     } finally {
       setLoading(false)
     }
@@ -158,6 +180,7 @@ export default function LoanAssessment() {
 
             <input
               type="number"
+              step="0.01"
               name="interestRate"
               placeholder="Interest Rate"
               value={form.interestRate}
@@ -184,6 +207,7 @@ export default function LoanAssessment() {
               <option value="rent">Rent</option>
               <option value="own">Own</option>
               <option value="mortgage">Mortgage</option>
+              <option value="other">Other</option>
             </select>
 
             <select
@@ -254,12 +278,20 @@ export default function LoanAssessment() {
                 className={`px-4 py-1 rounded-full text-sm font-medium ${
                   decision === "Approved"
                     ? "bg-green-500/20 text-green-400 border border-green-400"
-                    : "bg-red-500/20 text-red-400 border border-red-400"
+                    : decision === "Rejected"
+                    ? "bg-red-500/20 text-red-400 border border-red-400"
+                    : "bg-gray-500/20 text-gray-300 border border-gray-400"
                 }`}
               >
                 {decision || "Pending"}
               </span>
             </div>
+
+            {overrideReason && (
+              <p className="mt-3 text-sm text-orange-400">
+                ⚠ Rule Override: {overrideReason}
+              </p>
+            )}
 
             <div className="mt-6">
               <div className="flex items-center justify-between">
@@ -288,26 +320,26 @@ export default function LoanAssessment() {
                 AI Explainability
               </h3>
 
-              {explanation.length === 0 && (
+              {explanation.length === 0 ? (
                 <p className="text-gray-500">
                   Run assessment to see AI reasoning
                 </p>
+              ) : (
+                <div className="space-y-3">
+                  {explanation.map((reason, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#0b1220] border border-white/10 rounded-lg p-4 flex items-center justify-between hover:border-purple-500 transition"
+                    >
+                      <span className="text-gray-200">{reason}</span>
+
+                      <span className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-400">
+                        Factor
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
-
-              <div className="space-y-3">
-                {explanation.map((reason, index) => (
-                  <div
-                    key={index}
-                    className="bg-[#0b1220] border border-white/10 rounded-lg p-4 flex items-center justify-between hover:border-purple-500 transition"
-                  >
-                    <span className="text-gray-200">{reason}</span>
-
-                    <span className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-400">
-                      Factor
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
