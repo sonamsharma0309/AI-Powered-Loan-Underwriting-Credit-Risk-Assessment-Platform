@@ -103,6 +103,7 @@ function Dashboard() {
               // Card title text styling
               {(stats.average_risk * 100).toFixed(2)}%
               // Card value highlight styling
+              // Percentage calculation for risk
             </h2>
           </div>
 
