@@ -6,6 +6,7 @@ const NotFound = () => {
   const location = useLocation();
 // Effect hook to track invalid route access
   useEffect(() => {
+    // Log error message for debugging unknown routes
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
