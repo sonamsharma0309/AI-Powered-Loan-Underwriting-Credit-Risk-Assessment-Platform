@@ -41,7 +41,7 @@ Switch between dark and light mode
 <button
 onClick={toggleTheme}
 className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg"
->
+>// Dynamic icon rendering based on theme
 {theme === "dark" ? <Sun size={18}/> : <Moon size={18}/>}
 Toggle Theme
 </button>
