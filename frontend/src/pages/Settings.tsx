@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Moon, Sun, Bell, Mail, Save } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
-
+// Settings page component for user preferences
 function Settings(){
 
 const { theme, toggleTheme } = useAuth()
