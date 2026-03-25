@@ -70,7 +70,7 @@ notifications ? "bg-green-600" : "bg-white/10"
 </button>
 
 </div>
-
+// Email alerts section container
 {/* EMAIL ALERTS */}
 
 <div className="flex items-center justify-between">
