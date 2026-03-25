@@ -81,7 +81,7 @@ function Dashboard() {
               {stats.total_applications}
             </h2>
           </div>
-
+// Approved loans card UI
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
             <p className="text-gray-400 text-sm">Approved Loans</p>
             <h2 className="text-3xl font-semibold mt-2 text-green-400">
