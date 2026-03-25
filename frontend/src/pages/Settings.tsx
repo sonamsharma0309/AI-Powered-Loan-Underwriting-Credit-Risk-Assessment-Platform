@@ -74,7 +74,7 @@ notifications ? "bg-green-600" : "bg-white/10"
 {/* EMAIL ALERTS */}
 // Email alerts row layout
 <div className="flex items-center justify-between">
-
+// Email alerts description text
 <div>
 <p className="font-semibold">Email Alerts</p>
 <p className="text-sm text-gray-400">
