@@ -102,6 +102,7 @@ function Dashboard() {
             <h2 className="text-3xl font-semibold mt-2 text-yellow-400">
               // Card title text styling
               {(stats.average_risk * 100).toFixed(2)}%
+              // Card value highlight styling
             </h2>
           </div>
 
