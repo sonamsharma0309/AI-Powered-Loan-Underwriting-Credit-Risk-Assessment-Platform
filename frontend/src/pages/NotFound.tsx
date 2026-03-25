@@ -4,7 +4,7 @@ import { useEffect } from "react";
 const NotFound = () => { 
   // Access current route location using react-router
   const location = useLocation();
-
+// Effect hook to track invalid route access
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
