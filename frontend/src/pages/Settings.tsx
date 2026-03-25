@@ -24,7 +24,7 @@ return(
 <h1 className="text-3xl font-semibold mb-8">
 Settings
 </h1>
-
+// Settings card main container
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-8 space-y-8">
 
 {/* THEME */}
