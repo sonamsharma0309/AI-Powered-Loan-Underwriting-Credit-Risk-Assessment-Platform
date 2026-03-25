@@ -28,18 +28,34 @@ const API =
 export default function RiskAnalytics() {
   const [apps, setApps] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
-    fetch(`${API}/analytics`)
-      .then((res) => res.json())
-      .then((data) => {
-        setApps(data)
-        setLoading(false)
-      })
-      .catch((err) => {
+    const fetchAnalytics = async () => {
+      try {
+        const res = await fetch(`${API}/analytics`)
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`)
+        }
+
+        const data = await res.json()
+        console.log("Analytics API response:", data)
+
+        if (Array.isArray(data)) {
+          setApps(data)
+        } else {
+          throw new Error("API did not return an array")
+        }
+      } catch (err: any) {
         console.error("Analytics fetch error:", err)
+        setError(err.message || "Failed to load analytics")
+      } finally {
         setLoading(false)
-      })
+      }
+    }
+
+    fetchAnalytics()
   }, [])
 
   const approved = apps.filter((a) => a.decision === "Approved").length
@@ -50,10 +66,10 @@ export default function RiskAnalytics() {
 
   const avgRisk =
     apps.length > 0
-      ? (apps.reduce((sum, a) => sum + a.risk, 0) / apps.length).toFixed(1)
+      ? (apps.reduce((sum, a) => sum + Number(a.risk || 0), 0) / apps.length).toFixed(1)
       : "0"
 
-  const totalLoans = apps.reduce((sum, a) => sum + a.loan, 0)
+  const totalLoans = apps.reduce((sum, a) => sum + Number(a.loan || 0), 0)
 
   const decisionData = [
     { name: "Approved", value: approved },
@@ -62,10 +78,7 @@ export default function RiskAnalytics() {
 
   const riskBuckets = [
     { name: "Low Risk", value: apps.filter((a) => a.risk < 40).length },
-    {
-      name: "Medium Risk",
-      value: apps.filter((a) => a.risk >= 40 && a.risk < 70).length
-    },
+    { name: "Medium Risk", value: apps.filter((a) => a.risk >= 40 && a.risk < 70).length },
     { name: "High Risk", value: apps.filter((a) => a.risk >= 70).length }
   ]
 
@@ -75,17 +88,18 @@ export default function RiskAnalytics() {
     return <div className="p-8 text-gray-400">Loading Analytics...</div>
   }
 
+  if (error) {
+    return <div className="p-8 text-red-400">Error: {error}</div>
+  }
+
   return (
     <div className="p-8 text-white">
       <h1 className="text-4xl font-bold mb-8">Advanced Analytics</h1>
 
-      {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
         <div className="bg-[#1e293b] rounded-xl p-6">
           <p className="text-gray-400 text-sm">Total Loan Amount</p>
-          <h2 className="text-3xl font-bold">
-            ${totalLoans.toLocaleString()}
-          </h2>
+          <h2 className="text-3xl font-bold">${totalLoans.toLocaleString()}</h2>
         </div>
 
         <div className="bg-green-700 rounded-xl p-6">
@@ -104,12 +118,9 @@ export default function RiskAnalytics() {
         </div>
       </div>
 
-      {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Decision Chart */}
         <div className="bg-[#020617] p-6 rounded-xl border border-gray-800">
           <h2 className="text-lg font-semibold mb-6">Loan Decisions</h2>
-
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={decisionData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -121,10 +132,8 @@ export default function RiskAnalytics() {
           </ResponsiveContainer>
         </div>
 
-        {/* Risk Distribution */}
         <div className="bg-[#020617] p-6 rounded-xl border border-gray-800">
           <h2 className="text-lg font-semibold mb-6">Risk Distribution</h2>
-
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -134,7 +143,7 @@ export default function RiskAnalytics() {
                 outerRadius={110}
                 label
               >
-                {riskBuckets.map((entry, index) => (
+                {riskBuckets.map((_, index) => (
                   <Cell key={index} fill={COLORS[index]} />
                 ))}
               </Pie>
