@@ -45,7 +45,7 @@ function Dashboard() {
     <div className="min-h-screen text-white bg-gradient-to-br from-[#020617] via-[#07122b] to-[#020617]">
 // Main padding and spacing container
       <div className="p-10 space-y-10">
-
+// Header section for dashboard title and status
         {/* HEADER */}
         <div className="flex items-center justify-between">
 
