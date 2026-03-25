@@ -25,7 +25,7 @@ function Dashboard() {
         // 🔥 SAFE HANDLING
         // Safe fallback handling for API data
         const safeData = data?.data || data || {}
-
+// Update stats state with safe data
         setStats({
           total_applications: safeData.total_applications || 0,
           approved_loans: safeData.approved_loans || 0,
