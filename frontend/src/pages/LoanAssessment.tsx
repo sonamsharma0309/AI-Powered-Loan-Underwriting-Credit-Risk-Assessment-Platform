@@ -25,11 +25,11 @@ const [error,setError]=useState("")
 
 const API="https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
-const handleChange=(e:any)=>{
-setForm({...form,[e.target.name]:e.target.value})
+const handleChange = (e: any) => {
+  setForm({ ...form, [e.target.name]: e.target.value })
 }
 
-const runAssessment=async()=>{
+const runAssessment = async () => {
 
 setLoading(true)
 setError("")
@@ -101,8 +101,6 @@ return(
 
 <div className="p-10 space-y-10">
 
-{/* PAGE HEADER */}
-
 <div>
 
 <h1 className="text-3xl font-semibold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
@@ -115,11 +113,7 @@ Evaluate borrower profile and generate AI credit risk decision
 
 </div>
 
-
 <div className="grid lg:grid-cols-2 gap-8">
-
-
-{/* FORM PANEL */}
 
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-xl shadow-xl">
 
@@ -129,73 +123,28 @@ Applicant Details
 
 <div className="grid grid-cols-2 gap-4">
 
-<input
-name="name"
-placeholder="Full Name"
-onChange={handleChange}
-className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
-/>
+<input name="name" placeholder="Full Name" onChange={handleChange} className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"/>
 
-<input
-name="age"
-placeholder="Age"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
-/>
+<input name="age" placeholder="Age" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"/>
 
-<input
-name="income"
-placeholder="Annual Income"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
-/>
+<input name="income" placeholder="Annual Income" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"/>
 
-<input
-name="loanAmount"
-placeholder="Loan Amount"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
-/>
+<input name="loanAmount" placeholder="Loan Amount" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"/>
 
-<input
-name="employmentYears"
-placeholder="Employment Years"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
-/>
+<input name="employmentYears" placeholder="Employment Years" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"/>
 
-<input
-name="interestRate"
-placeholder="Interest Rate (%)"
-onChange={handleChange}
-className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
-/>
+<input name="interestRate" placeholder="Interest Rate (%)" onChange={handleChange} className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"/>
 
-<input
-name="interestRate"
-placeholder="Interest Rate (%)"
-name="creditHistory"
-placeholder="Credit History Length"
-onChange={handleChange}
-className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"
-/>
+<input name="creditHistory" placeholder="Credit History Length" onChange={handleChange} className="col-span-2 p-3 rounded-lg bg-[#0f172a] border border-white/10 focus:border-purple-500 outline-none"/>
 
-<select
-name="homeOwnership"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
+<select name="homeOwnership" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10">
 <option value="">Home Ownership</option>
 <option value="rent">Rent</option>
 <option value="own">Own</option>
 <option value="mortgage">Mortgage</option>
 </select>
 
-<select
-name="loanIntent"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
+<select name="loanIntent" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10">
 <option value="">Loan Intent</option>
 <option value="education">Education</option>
 <option value="medical">Medical</option>
@@ -203,11 +152,7 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 <option value="business">Business</option>
 </select>
 
-<select
-name="loanGrade"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
+<select name="loanGrade" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10">
 <option value="">Loan Grade</option>
 <option value="A">A</option>
 <option value="B">B</option>
@@ -215,11 +160,7 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 <option value="D">D</option>
 </select>
 
-<select
-name="previousDefault"
-onChange={handleChange}
-className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
->
+<select name="previousDefault" onChange={handleChange} className="p-3 rounded-lg bg-[#0f172a] border border-white/10">
 <option value="">Previous Default</option>
 <option value="0">No</option>
 <option value="1">Yes</option>
@@ -227,24 +168,13 @@ className="p-3 rounded-lg bg-[#0f172a] border border-white/10"
 
 </div>
 
-<button
-onClick={runAssessment}
-disabled={loading}
-className="mt-6 w-full p-3 rounded-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-[1.02] transition"
->
-
+<button onClick={runAssessment} disabled={loading} className="mt-6 w-full p-3 rounded-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-[1.02] transition">
 {loading ? "Running AI Model..." : "Run AI Assessment"}
-
 </button>
 
-{error && (
-<p className="text-red-400 mt-4">{error}</p>
-)}
+{error && (<p className="text-red-400 mt-4">{error}</p>)}
 
 </div>
-
-
-{/* RESULT PANEL */}
 
 <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-xl shadow-xl">
 
@@ -266,15 +196,13 @@ Generated by ML Risk Model
 
 <div className="mt-6 text-center">
 
-<div
-className={`text-xl font-bold px-6 py-3 rounded-lg inline-block
+<div className={`text-xl font-bold px-6 py-3 rounded-lg inline-block
 ${decision==="Approved"
 ? "bg-green-500/20 text-green-400 border border-green-400"
 : decision==="Rejected"
 ? "bg-red-500/20 text-red-400 border border-red-400"
 : "bg-yellow-500/20 text-yellow-400 border border-yellow-400"}
-`}
->
+`}>
 
 {decision || "Awaiting Assessment"}
 
@@ -286,9 +214,6 @@ ${decision==="Approved"
 
 </div>
 
-
-{/* RISK BAR */}
-
 <div className="mt-6">
 
 <div className="flex justify-between text-sm text-gray-400">
@@ -298,8 +223,7 @@ ${decision==="Approved"
 
 <div className="w-full h-3 bg-white/10 rounded-full mt-2 overflow-hidden">
 
-<div
-className={`h-3 rounded-full transition-all duration-700
+<div className={`h-3 rounded-full transition-all duration-700
 ${risk < 40 ? "bg-green-400" : risk < 70 ? "bg-yellow-400" : "bg-red-500"}
 `}
 style={{width:`${risk}%`}}
@@ -308,9 +232,6 @@ style={{width:`${risk}%`}}
 </div>
 
 </div>
-
-
-{/* EXPLAINABILITY */}
 
 <div className="mt-8">
 
@@ -328,10 +249,7 @@ Run assessment to see AI reasoning
 
 {explanation.map((r,i)=>(
 
-<div
-key={i}
-className="bg-[#0f172a] border border-white/10 rounded-lg p-4 flex items-center justify-between hover:border-purple-500 transition"
->
+<div key={i} className="bg-[#0f172a] border border-white/10 rounded-lg p-4 flex items-center justify-between hover:border-purple-500 transition">
 
 <span className="text-gray-200">
 {r}
