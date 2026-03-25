@@ -361,3 +361,5 @@ Model Insights
 )
 
 }
+
+export default Dashboard
