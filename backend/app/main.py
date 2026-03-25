@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-model = joblib.load("../models/risk_model_optimized.pkl")
+model = joblib.load(os.path.join(os.path.dirname(__file__), "../models/risk_model_optimized.pkl"))
 
 
 def get_db():
