@@ -7,6 +7,7 @@ function Settings(){
 const { theme, toggleTheme } = useAuth()
 // State for system notifications toggle
 const [notifications,setNotifications]=useState(true)
+// State for email alerts toggle
 const [emailAlerts,setEmailAlerts]=useState(true)
 
 const saveSettings=()=>{
