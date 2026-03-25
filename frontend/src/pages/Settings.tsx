@@ -81,7 +81,7 @@ notifications ? "bg-green-600" : "bg-white/10"
 Receive important alerts via email
 </p>
 </div>
-
+// Email alerts toggle button
 <button
 onClick={()=>setEmailAlerts(!emailAlerts)}
 className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
