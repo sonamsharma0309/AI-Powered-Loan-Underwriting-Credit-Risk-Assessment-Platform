@@ -8,16 +8,6 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import joblib
-import pandas as pd
-import sqlite3
-import os
-
-app = Flask(__name__)
-CORS(app)
-
 BASE_DIR = os.path.dirname(__file__)
 BACKEND_DIR = os.path.dirname(BASE_DIR)
 MODELS_DIR = os.path.join(BACKEND_DIR, "models")
@@ -25,7 +15,7 @@ MODELS_DIR = os.path.join(BACKEND_DIR, "models")
 model = joblib.load(os.path.join(MODELS_DIR, "risk_model_optimized.pkl"))
 model_columns = joblib.load(os.path.join(MODELS_DIR, "model_columns.pkl"))
 
-# -------- DB --------
+
 def get_db():
     conn = sqlite3.connect("creditai.db")
     conn.row_factory = sqlite3.Row
@@ -47,6 +37,14 @@ def init_db():
     )
     """)
 
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -54,26 +52,114 @@ def init_db():
 def safe_float(v):
     try:
         return float(v)
-    except:
+    except Exception:
         return 0.0
 
 
 init_db()
 
 
-# -------- ROOT --------
 @app.route("/")
 def home():
     return jsonify({"message": "Backend Running 🚀"})
 
 
-# -------- PREDICT --------
+@app.route("/register", methods=["POST"])
+def register():
+    try:
+        data = request.get_json() or {}
+
+        email = str(data.get("email", "")).strip()
+        password = str(data.get("password", "")).strip()
+
+        if not email or not password:
+            return jsonify({
+                "success": False,
+                "message": "Email and password are required"
+            }), 400
+
+        conn = get_db()
+
+        existing_user = conn.execute(
+            "SELECT * FROM users WHERE email = ?",
+            (email,)
+        ).fetchone()
+
+        if existing_user:
+            conn.close()
+            return jsonify({
+                "success": False,
+                "message": "User already exists"
+            }), 409
+
+        conn.execute(
+            "INSERT INTO users(email, password) VALUES (?, ?)",
+            (email, password)
+        )
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "message": "Registration successful"
+        }), 201
+
+    except Exception as e:
+        print("Register error:", str(e))
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.get_json() or {}
+
+        email = str(data.get("email", "")).strip()
+        password = str(data.get("password", "")).strip()
+
+        if not email or not password:
+            return jsonify({
+                "success": False,
+                "message": "Email and password are required"
+            }), 400
+
+        conn = get_db()
+
+        user = conn.execute(
+            "SELECT * FROM users WHERE email = ? AND password = ?",
+            (email, password)
+        ).fetchone()
+
+        conn.close()
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "Invalid credentials"
+            }), 401
+
+        return jsonify({
+            "success": True,
+            "message": "Login successful",
+            "token": "creditai-user"
+        }), 200
+
+    except Exception as e:
+        print("Login error:", str(e))
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json() or {}
 
-        # -------- INPUT --------
         name = str(data.get("name", "")).strip()
         age = safe_float(data.get("age"))
         income = safe_float(data.get("income"))
@@ -87,7 +173,6 @@ def predict():
         grade = str(data.get("loanGrade", "")).strip().upper()
         default = str(data.get("previousDefault", "0")).strip()
 
-        # -------- VALIDATION --------
         if not name:
             return jsonify({"error": "Name required"}), 400
 
@@ -100,7 +185,6 @@ def predict():
         if emp < 0 or rate < 0 or credit < 0:
             return jsonify({"error": "Employment, interest rate, and credit history cannot be negative"}), 400
 
-        # -------- FEATURES --------
         ratio = loan / income if income > 0 else 0
         interest_ratio = rate / income if income > 0 else 0
         credit_ratio = credit / age if age > 0 else 0
@@ -120,19 +204,16 @@ def predict():
             "credit_history_ratio": credit_ratio,
             "emp_age_ratio": emp_ratio,
 
-            # FLAGS
             "high_loan_ratio_flag": 1 if ratio > 0.5 else 0,
             "short_credit_history_flag": 1 if credit < 2 else 0,
             "high_interest_flag": 1 if rate > 18 else 0,
             "young_and_low_history_flag": 1 if (age < 25 and credit < 3) else 0,
 
-            # HOME
             "person_home_ownership_RENT": 1 if home == "rent" else 0,
             "person_home_ownership_OWN": 1 if home == "own" else 0,
             "person_home_ownership_MORTGAGE": 1 if home == "mortgage" else 0,
             "person_home_ownership_OTHER": 1 if home == "other" else 0,
 
-            # INTENT
             "loan_intent_PERSONAL": 1 if intent == "personal" else 0,
             "loan_intent_EDUCATION": 1 if intent == "education" else 0,
             "loan_intent_MEDICAL": 1 if intent == "medical" else 0,
@@ -140,7 +221,6 @@ def predict():
             "loan_intent_HOMEIMPROVEMENT": 1 if intent == "homeimprovement" else 0,
             "loan_intent_DEBTCONSOLIDATION": 1 if intent == "debtconsolidation" else 0,
 
-            # GRADE
             "loan_grade_A": 1 if grade == "A" else 0,
             "loan_grade_B": 1 if grade == "B" else 0,
             "loan_grade_C": 1 if grade == "C" else 0,
@@ -149,7 +229,6 @@ def predict():
             "loan_grade_F": 1 if grade == "F" else 0,
             "loan_grade_G": 1 if grade == "G" else 0,
 
-            # DEFAULT
             "cb_person_default_on_file_N": 1 if default == "0" else 0,
             "cb_person_default_on_file_Y": 1 if default == "1" else 0,
         }
@@ -157,7 +236,6 @@ def predict():
         df = pd.DataFrame([row])
         df = df.reindex(columns=model_columns, fill_value=0)
 
-        # -------- MODEL --------
         prob = float(model.predict_proba(df)[0][1])
         risk = round(prob * 100, 2)
 
@@ -166,7 +244,6 @@ def predict():
         decision = "Approved"
         reason = None
 
-        # -------- RULE OVERRIDE --------
         if default == "1":
             decision = "Rejected"
             reason = "Previous default"
@@ -185,7 +262,6 @@ def predict():
         else:
             decision = "Rejected" if prob >= THRESHOLD else "Approved"
 
-        # -------- SAVE --------
         conn = get_db()
         conn.execute(
             "INSERT INTO applications(name, age, income, loan, decision, risk) VALUES (?, ?, ?, ?, ?, ?)",
@@ -206,7 +282,6 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 
-# -------- EXPLAIN --------
 @app.route("/explain", methods=["POST"])
 def explain():
     try:
@@ -225,22 +300,16 @@ def explain():
 
         if income > 0 and loan / income > 0.5:
             reasons.append("Loan amount is high compared to income")
-
         if credit < 2:
             reasons.append("Credit history is very short")
-
         if emp < 2:
             reasons.append("Employment history is limited")
-
         if rate > 18:
             reasons.append("Interest rate is very high")
-
         if default == "1":
             reasons.append("Previous default history increases risk")
-
         if grade in ["E", "F", "G"]:
             reasons.append("Loan grade indicates higher lending risk")
-
         if home == "rent":
             reasons.append("Rental status may indicate lower asset backing")
 
@@ -254,7 +323,6 @@ def explain():
         return jsonify({"error": str(e)}), 500
 
 
-# -------- ANALYTICS --------
 @app.route("/analytics")
 def analytics():
     try:
@@ -294,7 +362,6 @@ def analytics():
         return jsonify({"error": str(e)}), 500
 
 
-# -------- APPLICATIONS --------
 @app.route("/applications")
 def get_applications():
     try:
@@ -324,7 +391,6 @@ def get_applications():
         return jsonify({"error": str(e)}), 500
 
 
-# -------- RUN --------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
