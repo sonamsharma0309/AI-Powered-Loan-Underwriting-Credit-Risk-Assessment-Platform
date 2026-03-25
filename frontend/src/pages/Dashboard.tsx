@@ -18,6 +18,7 @@ function Dashboard() {
     fetch(`${API}/analytics`)
     // Convert response to JSON
       .then(res => res.json())
+      // Handle API response data
       .then(data => {
         console.log("API DATA:", data)
 
