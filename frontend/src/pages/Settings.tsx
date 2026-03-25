@@ -37,7 +37,7 @@ Settings
 Switch between dark and light mode
 </p>
 </div>
-
+// Theme toggle button UI
 <button
 onClick={toggleTheme}
 className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg"
