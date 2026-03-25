@@ -14,7 +14,7 @@ function Dashboard() {
   })
 // Effect hook to fetch analytics data on load
   useEffect(() => {
-
+// Fetch analytics data from backend API
     fetch(`${API}/analytics`)
       .then(res => res.json())
       .then(data => {
