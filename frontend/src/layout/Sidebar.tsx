@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 
 function Sidebar() {
-
-  const { setToken, user } = useAuth(); // ✅ user added
+  const { setToken } = useAuth(); // ❌ user removed
   const [collapsed, setCollapsed] = useState(false);
 
   const logout = () => {
@@ -35,12 +34,10 @@ function Sidebar() {
     >
 
       {/* HEADER */}
-
       <div className="flex items-center justify-between px-5 py-5">
 
         {!collapsed && (
           <div className="flex items-center gap-3">
-
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg shadow-purple-500/30">
               AI
             </div>
@@ -48,7 +45,6 @@ function Sidebar() {
             <span className="text-lg font-semibold tracking-wide bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
               CreditAI
             </span>
-
           </div>
         )}
 
@@ -62,20 +58,16 @@ function Sidebar() {
       </div>
 
       {/* NAVIGATION */}
-
       <nav className="flex flex-col gap-2 px-3 mt-2">
 
         {/* DASHBOARD */}
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            `${navItem} ${
-              isActive
-                ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
-                : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`
-          }
-        >
+        <NavLink to="/dashboard" className={({ isActive }) =>
+          `${navItem} ${
+            isActive
+              ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`
+        }>
           {({ isActive }) => (
             <>
               {isActive && (
@@ -88,16 +80,13 @@ function Sidebar() {
         </NavLink>
 
         {/* ASSESSMENT */}
-        <NavLink
-          to="/assessment"
-          className={({ isActive }) =>
-            `${navItem} ${
-              isActive
-                ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
-                : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`
-          }
-        >
+        <NavLink to="/assessment" className={({ isActive }) =>
+          `${navItem} ${
+            isActive
+              ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`
+        }>
           {({ isActive }) => (
             <>
               {isActive && (
@@ -110,16 +99,13 @@ function Sidebar() {
         </NavLink>
 
         {/* APPLICATIONS */}
-        <NavLink
-          to="/applications"
-          className={({ isActive }) =>
-            `${navItem} ${
-              isActive
-                ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
-                : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`
-          }
-        >
+        <NavLink to="/applications" className={({ isActive }) =>
+          `${navItem} ${
+            isActive
+              ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`
+        }>
           {({ isActive }) => (
             <>
               {isActive && (
@@ -131,61 +117,48 @@ function Sidebar() {
           )}
         </NavLink>
 
-        {/* 🔐 ADMIN ONLY - ANALYTICS */}
-        {user?.role === "admin" && (
-          <NavLink
-            to="/analytics"
-            className={({ isActive }) =>
-              `${navItem} ${
-                isActive
-                  ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
-                )}
-                <BarChart3 size={20} />
-                {!collapsed && <span>Risk Analytics</span>}
-              </>
-            )}
-          </NavLink>
-        )}
+        {/* ✅ NOW VISIBLE FOR ALL USERS */}
+        <NavLink to="/analytics" className={({ isActive }) =>
+          `${navItem} ${
+            isActive
+              ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`
+        }>
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
+              )}
+              <BarChart3 size={20} />
+              {!collapsed && <span>Risk Analytics</span>}
+            </>
+          )}
+        </NavLink>
 
-        {/* 🔐 ADMIN ONLY - AUDIT */}
-        {user?.role === "admin" && (
-          <NavLink
-            to="/audit"
-            className={({ isActive }) =>
-              `${navItem} ${
-                isActive
-                  ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
-                )}
-                <ShieldCheck size={20} />
-                {!collapsed && <span>Audit Logs</span>}
-              </>
-            )}
-          </NavLink>
-        )}
+        <NavLink to="/audit" className={({ isActive }) =>
+          `${navItem} ${
+            isActive
+              ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/20 text-white"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          }`
+        }>
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <div className="absolute left-0 h-8 w-[3px] bg-purple-500 rounded-r-full"></div>
+              )}
+              <ShieldCheck size={20} />
+              {!collapsed && <span>Audit Logs</span>}
+            </>
+          )}
+        </NavLink>
 
       </nav>
 
       {/* SYSTEM STATUS */}
-
       {!collapsed && (
         <div className="mx-4 mt-6 p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-white/10 text-sm">
-
           <div className="flex items-center gap-2 text-green-400 mb-1">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             Backend Connected
@@ -194,14 +167,11 @@ function Sidebar() {
           <p className="text-xs text-gray-400">
             AI risk engine active
           </p>
-
         </div>
       )}
 
       {/* LOGOUT */}
-
       <div className="mt-auto p-4">
-
         <button
           onClick={logout}
           className="flex items-center gap-3 w-full px-4 py-3 rounded-xl
@@ -211,7 +181,6 @@ function Sidebar() {
           <LogOut size={20} />
           {!collapsed && <span>Logout</span>}
         </button>
-
       </div>
 
     </aside>
