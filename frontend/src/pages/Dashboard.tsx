@@ -41,7 +41,7 @@ function Dashboard() {
   }, [])
 
   return (
-
+// Root container for dashboard UI
     <div className="min-h-screen text-white bg-gradient-to-br from-[#020617] via-[#07122b] to-[#020617]">
 
       <div className="p-10 space-y-10">
