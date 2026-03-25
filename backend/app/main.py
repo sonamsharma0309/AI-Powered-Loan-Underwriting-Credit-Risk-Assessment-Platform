@@ -8,13 +8,22 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-BASE_DIR = os.path.dirname(__file__)
-MODELS_DIR = os.path.join(BASE_DIR, "./models")
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import joblib
+import pandas as pd
+import sqlite3
+import os
 
-# -------- LOAD MODEL --------
+app = Flask(__name__)
+CORS(app)
+
+BASE_DIR = os.path.dirname(__file__)
+BACKEND_DIR = os.path.dirname(BASE_DIR)
+MODELS_DIR = os.path.join(BACKEND_DIR, "models")
+
 model = joblib.load(os.path.join(MODELS_DIR, "risk_model_optimized.pkl"))
 model_columns = joblib.load(os.path.join(MODELS_DIR, "model_columns.pkl"))
-
 
 # -------- DB --------
 def get_db():
