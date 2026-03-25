@@ -15,7 +15,7 @@ alert("Settings saved")
 }
 
 return(
-
+// Root container for settings page
 <div className="min-h-screen text-white">
 
 <div className="max-w-4xl">
