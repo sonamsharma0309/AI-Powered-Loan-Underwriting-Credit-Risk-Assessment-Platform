@@ -51,7 +51,7 @@ Toggle Theme
 {/* SYSTEM NOTIFICATIONS */}
 // Notifications row layout
 <div className="flex items-center justify-between">
-
+// Notifications description text
 <div>
 <p className="font-semibold">System Notifications</p>
 <p className="text-sm text-gray-400">
