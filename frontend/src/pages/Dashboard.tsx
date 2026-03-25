@@ -5,7 +5,7 @@ const API =
   "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 // Dashboard component for analytics overview
 function Dashboard() {
-
+// State for storing dashboard statistics
   const [stats, setStats] = useState<any>({
     total_applications: 0,
     approved_loans: 0,
