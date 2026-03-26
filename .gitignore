@@ -3,7 +3,11 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.py[cod]
 *.log
+
+# ML Models
+*.pkl
 
 # Database
 *.db
@@ -14,9 +18,8 @@ __pycache__/
 .env.local
 .env.*.local
 
-# Python virtual environments
+# Virtual environments
 venv/
-.env/
 
 # Node
 node_modules/
@@ -26,10 +29,16 @@ dist/
 build/
 coverage/
 
-# OS files
+# Logs
+logs/
+
+# OS
 .DS_Store
 Thumbs.db
 
 # IDE
 .vscode/
 .idea/
+
+# Executables
+*.exe
