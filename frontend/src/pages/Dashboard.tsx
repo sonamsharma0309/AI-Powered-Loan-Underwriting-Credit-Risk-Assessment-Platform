@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 
 const API =
   import.meta.env.VITE_API_URL ||
-  
   "https://ai-powered-loan-underwriting-credit-risk-3at2.onrender.com"
 
 function Dashboard(){
