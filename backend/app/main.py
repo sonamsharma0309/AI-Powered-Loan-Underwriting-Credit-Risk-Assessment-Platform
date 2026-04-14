@@ -8,16 +8,45 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-BASE_DIR = os.path.dirname(__file__)
-BACKEND_DIR = os.path.dirname(BASE_DIR)
-MODELS_DIR = os.path.join(BACKEND_DIR, "models")
+# =========================
+# PATH SETUP
+# =========================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))          # backend/app
+BACKEND_DIR = os.path.dirname(BASE_DIR)                       # backend
+MODELS_DIR = os.path.join(BACKEND_DIR, "models")              # backend/models
+DB_PATH = os.path.join(BACKEND_DIR, "creditai.db")            # backend/creditai.db
 
-model = joblib.load(os.path.join(MODELS_DIR, "risk_model_optimized.pkl"))
-model_columns = joblib.load(os.path.join(MODELS_DIR, "model_columns.pkl"))
+MODEL_FILE = os.path.join(MODELS_DIR, "risk_model_optimized.pkl")
+COLUMNS_FILE = os.path.join(MODELS_DIR, "model_columns.pkl")
 
 
+def load_artifacts():
+    if not os.path.exists(MODEL_FILE):
+        raise FileNotFoundError(
+            f"Model file not found: {MODEL_FILE}. "
+            f"Make sure risk_model_optimized.pkl exists in backend/models and is pushed to GitHub."
+        )
+
+    if not os.path.exists(COLUMNS_FILE):
+        raise FileNotFoundError(
+            f"Model columns file not found: {COLUMNS_FILE}. "
+            f"Make sure model_columns.pkl exists in backend/models and is pushed to GitHub."
+        )
+
+    loaded_model = joblib.load(MODEL_FILE)
+    loaded_columns = joblib.load(COLUMNS_FILE)
+
+    return loaded_model, loaded_columns
+
+
+model, model_columns = load_artifacts()
+
+
+# =========================
+# DATABASE
+# =========================
 def get_db():
-    conn = sqlite3.connect("creditai.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -52,22 +81,39 @@ def init_db():
 def safe_float(v):
     try:
         return float(v)
-    except Exception:
+    except (TypeError, ValueError):
         return 0.0
 
 
 init_db()
 
 
-@app.route("/")
+# =========================
+# ROUTES
+# =========================
+@app.route("/", methods=["GET"])
 def home():
-    return jsonify({"message": "Backend Running 🚀"})
+    return jsonify({
+        "message": "Backend Running 🚀",
+        "model_loaded": True,
+        "db_path": DB_PATH
+    }), 200
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "ok",
+        "model_file_exists": os.path.exists(MODEL_FILE),
+        "columns_file_exists": os.path.exists(COLUMNS_FILE),
+        "db_exists": os.path.exists(DB_PATH)
+    }), 200
 
 
 @app.route("/register", methods=["POST"])
 def register():
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
 
         email = str(data.get("email", "")).strip()
         password = str(data.get("password", "")).strip()
@@ -115,7 +161,7 @@ def register():
 @app.route("/login", methods=["POST"])
 def login():
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
 
         email = str(data.get("email", "")).strip()
         password = str(data.get("password", "")).strip()
@@ -158,7 +204,7 @@ def login():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
 
         name = str(data.get("name", "")).strip()
         age = safe_float(data.get("age"))
@@ -183,7 +229,9 @@ def predict():
             return jsonify({"error": "Invalid income/loan"}), 400
 
         if emp < 0 or rate < 0 or credit < 0:
-            return jsonify({"error": "Employment, interest rate, and credit history cannot be negative"}), 400
+            return jsonify({
+                "error": "Employment, interest rate, and credit history cannot be negative"
+            }), 400
 
         ratio = loan / income if income > 0 else 0
         interest_ratio = rate / income if income > 0 else 0
@@ -275,17 +323,17 @@ def predict():
             "decision": decision,
             "override_reason": reason,
             "approval_probability": round((1 - prob) * 100, 2)
-        })
+        }), 200
 
     except Exception as e:
-        print("Error:", str(e))
+        print("Predict error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
 @app.route("/explain", methods=["POST"])
 def explain():
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
 
         income = safe_float(data.get("income"))
         loan = safe_float(data.get("loanAmount"))
@@ -298,7 +346,7 @@ def explain():
 
         reasons = []
 
-        if income > 0 and loan / income > 0.5:
+        if income > 0 and (loan / income) > 0.5:
             reasons.append("Loan amount is high compared to income")
         if credit < 2:
             reasons.append("Credit history is very short")
@@ -316,14 +364,14 @@ def explain():
         if not reasons:
             reasons.append("Applicant profile looks stable and balanced")
 
-        return jsonify({"reasons": reasons})
+        return jsonify({"reasons": reasons}), 200
 
     except Exception as e:
         print("Explain error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/analytics")
+@app.route("/analytics", methods=["GET"])
 def analytics():
     try:
         conn = get_db()
@@ -356,13 +404,14 @@ def analytics():
             "rejected": rejected,
             "avg_risk": avg_risk or 0,
             "total_loan": total_loan or 0
-        })
+        }), 200
+
     except Exception as e:
         print("Analytics error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/applications")
+@app.route("/applications", methods=["GET"])
 def get_applications():
     try:
         conn = get_db()
@@ -384,7 +433,7 @@ def get_applications():
             })
 
         conn.close()
-        return jsonify(data)
+        return jsonify(data), 200
 
     except Exception as e:
         print("Applications error:", str(e))
