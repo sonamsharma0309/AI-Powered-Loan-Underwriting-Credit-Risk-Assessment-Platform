@@ -31,31 +31,31 @@ export default function RiskAnalytics() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchApplications = async () => {
       try {
-        const res = await fetch(`${API}/analytics`)
+        const res = await fetch(`${API}/applications`)
 
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`)
         }
 
         const data = await res.json()
-        console.log("Analytics API response:", data)
+        console.log("Applications API response:", data)
 
         if (Array.isArray(data)) {
           setApps(data)
         } else {
-          throw new Error("API did not return an array")
+          setApps([])
         }
       } catch (err: any) {
-        console.error("Analytics fetch error:", err)
+        console.error("Applications fetch error:", err)
         setError(err.message || "Failed to load analytics")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchAnalytics()
+    fetchApplications()
   }, [])
 
   const approved = apps.filter((a) => a.decision === "Approved").length
@@ -66,7 +66,9 @@ export default function RiskAnalytics() {
 
   const avgRisk =
     apps.length > 0
-      ? (apps.reduce((sum, a) => sum + Number(a.risk || 0), 0) / apps.length).toFixed(1)
+      ? (
+          apps.reduce((sum, a) => sum + Number(a.risk || 0), 0) / apps.length
+        ).toFixed(1)
       : "0"
 
   const totalLoans = apps.reduce((sum, a) => sum + Number(a.loan || 0), 0)
