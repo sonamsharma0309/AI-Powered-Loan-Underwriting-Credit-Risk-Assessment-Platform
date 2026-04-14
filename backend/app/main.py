@@ -439,6 +439,31 @@ def get_applications():
         print("Applications error:", str(e))
         return jsonify({"error": str(e)}), 500
 
+@app.route("/audit", methods=["GET"])
+def audit():
+    try:
+        conn = get_db()
+
+        rows = conn.execute("""
+            SELECT id, name, decision, risk
+            FROM applications
+            ORDER BY id DESC
+        """).fetchall()
+
+        logs = []
+        for r in rows:
+            logs.append({
+                "event": "Loan Application Reviewed",
+                "details": f"{r['name']} - {r['decision']} ({r['risk']}% risk)",
+                "time": f"Application ID #{r['id']}"
+            })
+
+        conn.close()
+        return jsonify(logs), 200
+
+    except Exception as e:
+        print("Audit error:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
