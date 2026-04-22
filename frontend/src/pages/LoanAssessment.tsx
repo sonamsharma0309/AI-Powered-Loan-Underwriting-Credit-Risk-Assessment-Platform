@@ -267,20 +267,21 @@ export default function LoanAssessment() {
         <div className="bg-[#111827] rounded-2xl shadow-xl border border-white/10 p-8">
           <h2 className="text-2xl font-bold mb-6">Assessment Result</h2>
 
-          <div className="flex justify-center mb-8">
-            <RiskGauge risk={risk} />
-          </div>
+          <div className="bg-[#0f172a] rounded-2xl p-8 border border-white/10">
+            <div className="flex justify-center mb-8">
+              <RiskGauge risk={risk} />
+            </div>
 
-          <div className="bg-[#0f172a] rounded-xl p-6 border border-white/10">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Decision</h3>
+              <h3 className="text-2xl font-bold text-white">Decision</h3>
+
               <span
-                className={`px-4 py-1 rounded-full text-sm font-medium ${
+                className={`px-5 py-2 rounded-full text-sm font-medium border ${
                   decision === "Approved"
-                    ? "bg-green-500/20 text-green-400 border border-green-400"
+                    ? "bg-green-500/15 text-green-400 border-green-400/40"
                     : decision === "Rejected"
-                    ? "bg-red-500/20 text-red-400 border border-red-400"
-                    : "bg-gray-500/20 text-gray-300 border border-gray-400"
+                    ? "bg-red-500/15 text-red-400 border-red-400/40"
+                    : "bg-gray-500/15 text-gray-300 border-gray-400/30"
                 }`}
               >
                 {decision || "Pending"}
@@ -288,20 +289,22 @@ export default function LoanAssessment() {
             </div>
 
             {overrideReason && (
-              <p className="mt-3 text-sm text-orange-400">
+              <p className="mt-5 text-orange-400 text-sm font-medium">
                 ⚠ Rule Override: {overrideReason}
               </p>
             )}
 
-            <div className="mt-6">
+            <div className="mt-10">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Risk Score</h3>
-                <span className="text-white font-bold">{risk}%</span>
+                <h3 className="text-2xl font-bold text-white">Risk Score</h3>
+                <span className="text-2xl font-bold text-white">{risk}%</span>
               </div>
 
-              <p className={`mt-2 text-sm ${riskColor()}`}>{riskLevel()}</p>
+              <p className={`mt-2 text-lg font-medium ${riskColor()}`}>
+                {riskLevel()}
+              </p>
 
-              <div className="mt-3 w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+              <div className="mt-5 w-full bg-slate-800 rounded-full h-3 overflow-hidden">
                 <div
                   className={`h-3 rounded-full transition-all duration-700 ${
                     risk < 40
@@ -315,8 +318,8 @@ export default function LoanAssessment() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <h3 className="font-semibold mb-4 text-lg text-purple-400">
+            <div className="mt-10">
+              <h3 className="font-bold mb-5 text-2xl text-purple-400">
                 AI Explainability
               </h3>
 
@@ -325,15 +328,15 @@ export default function LoanAssessment() {
                   Run assessment to see AI reasoning
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {explanation.map((reason, index) => (
                     <div
                       key={index}
-                      className="bg-[#0b1220] border border-white/10 rounded-lg p-4 flex items-center justify-between hover:border-purple-500 transition"
+                      className="bg-[#0b1220] border border-white/10 rounded-xl px-5 py-4 flex justify-between items-center gap-4"
                     >
-                      <span className="text-gray-200">{reason}</span>
+                      <span className="text-gray-100">{reason}</span>
 
-                      <span className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-400">
+                      <span className="shrink-0 text-xs px-3 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-400/30">
                         Factor
                       </span>
                     </div>
