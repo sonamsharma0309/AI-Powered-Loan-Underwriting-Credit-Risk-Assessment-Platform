@@ -275,7 +275,7 @@ export default function LoanAssessment() {
 
           <div className="bg-[#0f172a] rounded-2xl p-8 border border-white/10">
             <div className="flex justify-center mb-8">
-              <RiskGauge risk={hasAssessed ? risk : 0} />
+              <RiskGauge score={hasAssessed ? risk : 0} />
             </div>
 
             <div className="flex items-center justify-between">
