@@ -62,7 +62,8 @@ def init_db():
         income REAL,
         loan REAL,
         decision TEXT,
-        risk REAL
+        risk REAL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
@@ -73,6 +74,11 @@ def init_db():
         password TEXT
     )
     """)
+
+    # Existing DB me created_at column add karne ke liye
+    columns = [row["name"] for row in conn.execute("PRAGMA table_info(applications)").fetchall()]
+    if "created_at" not in columns:
+        conn.execute("ALTER TABLE applications ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 
     conn.commit()
     conn.close()
@@ -399,15 +405,42 @@ def analytics():
         conn.close()
 
         return jsonify({
-            "total": total,
-            "approved": approved,
-            "rejected": rejected,
-            "avg_risk": avg_risk or 0,
+            "total_applications": total,
+            "approved_loans": approved,
+            "rejected_loans": rejected,
+            "average_risk": avg_risk or 0,
             "total_loan": total_loan or 0
         }), 200
 
     except Exception as e:
         print("Analytics error:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/recent-activities", methods=["GET"])
+def recent_activities():
+    try:
+        conn = get_db()
+
+        rows = conn.execute("""
+            SELECT id, name, decision, risk, created_at
+            FROM applications
+            ORDER BY id DESC
+            LIMIT 10
+        """).fetchall()
+
+        data = []
+        for r in rows:
+            data.append({
+                "message": f"Loan {r['decision'].lower()} for {r['name']}",
+                "time": r["created_at"] if r["created_at"] else f"Application ID #{r['id']}"
+            })
+
+        conn.close()
+        return jsonify(data), 200
+
+    except Exception as e:
+        print("Recent activities error:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -439,6 +472,7 @@ def get_applications():
         print("Applications error:", str(e))
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/audit", methods=["GET"])
 def audit():
     try:
@@ -464,6 +498,7 @@ def audit():
     except Exception as e:
         print("Audit error:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
