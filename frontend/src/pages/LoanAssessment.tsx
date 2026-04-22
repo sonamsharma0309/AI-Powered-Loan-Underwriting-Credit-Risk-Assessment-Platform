@@ -22,6 +22,7 @@ export default function LoanAssessment() {
   const [overrideReason, setOverrideReason] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [hasAssessed, setHasAssessed] = useState(false)
 
   const API =
     import.meta.env.VITE_API_URL ||
@@ -57,6 +58,7 @@ export default function LoanAssessment() {
     setDecision("")
     setOverrideReason("")
     setRisk(0)
+    setHasAssessed(false)
 
     try {
       const payload = {
@@ -90,6 +92,7 @@ export default function LoanAssessment() {
       setRisk(Math.round(data.risk_score || 0))
       setDecision(data.decision || "Rejected")
       setOverrideReason(data.override_reason || "")
+      setHasAssessed(true)
 
       const exp = await fetch(`${API}/explain`, {
         method: "POST",
@@ -106,18 +109,21 @@ export default function LoanAssessment() {
     } catch (err: any) {
       console.error("Assessment error:", err)
       setError(err.message || "Something went wrong while assessing the loan.")
+      setHasAssessed(false)
     } finally {
       setLoading(false)
     }
   }
 
   const riskColor = () => {
+    if (!hasAssessed) return "text-gray-400"
     if (risk < 40) return "text-green-400"
     if (risk < 70) return "text-yellow-400"
     return "text-red-400"
   }
 
   const riskLevel = () => {
+    if (!hasAssessed) return "Awaiting Assessment"
     if (risk < 40) return "Low Risk"
     if (risk < 70) return "Medium Risk"
     return "High Risk"
@@ -269,7 +275,7 @@ export default function LoanAssessment() {
 
           <div className="bg-[#0f172a] rounded-2xl p-8 border border-white/10">
             <div className="flex justify-center mb-8">
-              <RiskGauge risk={risk} />
+              <RiskGauge risk={hasAssessed ? risk : 0} />
             </div>
 
             <div className="flex items-center justify-between">
@@ -277,18 +283,18 @@ export default function LoanAssessment() {
 
               <span
                 className={`px-5 py-2 rounded-full text-sm font-medium border ${
-                  decision === "Approved"
+                  !hasAssessed
+                    ? "bg-gray-500/15 text-gray-300 border-gray-400/30"
+                    : decision === "Approved"
                     ? "bg-green-500/15 text-green-400 border-green-400/40"
-                    : decision === "Rejected"
-                    ? "bg-red-500/15 text-red-400 border-red-400/40"
-                    : "bg-gray-500/15 text-gray-300 border-gray-400/30"
+                    : "bg-red-500/15 text-red-400 border-red-400/40"
                 }`}
               >
-                {decision || "Pending"}
+                {hasAssessed ? decision : "Pending"}
               </span>
             </div>
 
-            {overrideReason && (
+            {hasAssessed && overrideReason && (
               <p className="mt-5 text-orange-400 text-sm font-medium">
                 ⚠ Rule Override: {overrideReason}
               </p>
@@ -297,7 +303,9 @@ export default function LoanAssessment() {
             <div className="mt-10">
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-white">Risk Score</h3>
-                <span className="text-2xl font-bold text-white">{risk}%</span>
+                <span className="text-2xl font-bold text-white">
+                  {hasAssessed ? `${risk}%` : "--"}
+                </span>
               </div>
 
               <p className={`mt-2 text-lg font-medium ${riskColor()}`}>
@@ -307,13 +315,15 @@ export default function LoanAssessment() {
               <div className="mt-5 w-full bg-slate-800 rounded-full h-3 overflow-hidden">
                 <div
                   className={`h-3 rounded-full transition-all duration-700 ${
-                    risk < 40
+                    !hasAssessed
+                      ? "bg-gray-500"
+                      : risk < 40
                       ? "bg-green-400"
                       : risk < 70
                       ? "bg-yellow-400"
                       : "bg-red-500"
                   }`}
-                  style={{ width: `${risk}%` }}
+                  style={{ width: `${hasAssessed ? risk : 0}%` }}
                 />
               </div>
             </div>
@@ -323,9 +333,13 @@ export default function LoanAssessment() {
                 AI Explainability
               </h3>
 
-              {explanation.length === 0 ? (
+              {!hasAssessed ? (
                 <p className="text-gray-500">
                   Run assessment to see AI reasoning
+                </p>
+              ) : explanation.length === 0 ? (
+                <p className="text-gray-500">
+                  No explanation available for this assessment
                 </p>
               ) : (
                 <div className="space-y-4">
