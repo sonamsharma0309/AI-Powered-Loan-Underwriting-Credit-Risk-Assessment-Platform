@@ -57,7 +57,7 @@ if(data.success){
 
 setMessage("Account created!")
 
-setTimeout(()=>navigate("/"),1500)
+setTimeout(()=>navigate("/login"),1500)
 
 }else{
 
